@@ -31,7 +31,7 @@ public class InsertionHelper
 	private Document document = null;
 	private CompilationUnit cu = null;
 	private AST ast = null;
-	private TypeDeclaration singletonTypeDeclaration;
+	private TypeDeclaration topClassDeclaration;
 	
 	public InsertionHelper(IWorkbenchWindow window)
 	{
@@ -63,9 +63,9 @@ public class InsertionHelper
 		return ast;
 	}
 	
-	public TypeDeclaration getSingletonTypeDeclaration()
+	public TypeDeclaration getTopClassDeclaration()
 	{
-		return singletonTypeDeclaration;
+		return topClassDeclaration;
 	}
 	
 	// just retrieve a Document from an ICompilationUnit, nothing deep
@@ -130,8 +130,8 @@ public class InsertionHelper
 	// just have to make sure everything is initialized properly
 	// we're logging errors internally as they happen and display a generic error
 	// message to the user
-	// returning a boolean seems quaint but it keeps the central insertSingleton()
-	// method crisp and clean, compared to try-catch. not recommended otherwise.
+	// returning a boolean seems quaint but it keeps the central insertPattern()
+	// methods crisp and clean, compared to try-catch. 
 	public boolean init(ExecutionEvent event)
 	{
 		// icu
@@ -175,9 +175,8 @@ public class InsertionHelper
 			return false;
 		}
 		
-		// singletonTypeDeclaration
-		singletonTypeDeclaration = getSingletonClassTypeDeclaration(icu, cu, ast);
-		if (singletonTypeDeclaration == null)
+		topClassDeclaration = getTopClassDeclaration(icu, cu, ast);
+		if (topClassDeclaration == null)
 		{
 			displayErrorDialog("Could not parse a valid CompilationUnit object. Execution of the command has been aborted. See log for more details.");
 			return false;
@@ -187,10 +186,9 @@ public class InsertionHelper
 	}
 	
 	/**
-	 * Gets the AST declaration node of the top level class (the one that's meant to
-	 * be turned into a singleton)
+	 * Gets the AST declaration node of the top level class.
 	 */
-	private TypeDeclaration getSingletonClassTypeDeclaration(ICompilationUnit unit, CompilationUnit cu, AST ast)
+	private TypeDeclaration getTopClassDeclaration(ICompilationUnit unit, CompilationUnit cu, AST ast)
 	{
 		IType primaryType = unit.findPrimaryType();
 		if (primaryType == null)
@@ -201,30 +199,30 @@ public class InsertionHelper
 		
 		@SuppressWarnings("unchecked") // according to the javadoc of types() this should be safe
 		List<AbstractTypeDeclaration> typedeclarations = cu.types();
-		AbstractTypeDeclaration singletonClassDeclaration = null;
+		AbstractTypeDeclaration topClassDeclaration = null;
 		for (AbstractTypeDeclaration typeDeclaration : typedeclarations)
 		{
 			SimpleName typeName = typeDeclaration.getName();
 			// TODO check if the underlying assumption for this comparison holds true
 			if (typeName.toString().equals(primaryType.getTypeQualifiedName().toString()))
 			{
-				singletonClassDeclaration = typeDeclaration;
+				topClassDeclaration = typeDeclaration;
 				break;
 			}
 		}
 		
-		if (singletonClassDeclaration == null)
+		if (topClassDeclaration == null)
 		{
-			logger.error("getSingletonClassTypeDeclaration() found no match for primaryType.");
+			logger.error("getTopClassTypeDeclaration() found no match for primaryType.");
 			return null;
 		}
-		if (!(singletonClassDeclaration instanceof TypeDeclaration))
+		if (!(topClassDeclaration instanceof TypeDeclaration))
 		{
-			logger.error("getSingletonClassTypeDeclaration() found a match for primaryType but it could not be converted to class TypeDeclaration.");
+			logger.error("getTopClassTypeDeclaration() found a match for primaryType but it could not be converted to class TypeDeclaration.");
 			return null;
 		}
 		
-		return (TypeDeclaration) singletonClassDeclaration;
+		return (TypeDeclaration) topClassDeclaration;
 	}
 	
 }

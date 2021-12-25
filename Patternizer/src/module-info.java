@@ -24,4 +24,6 @@ module de.patternizer.eclipse
 	requires org.eclipse.core.databinding.beans;
 	requires org.eclipse.core.databinding.observable;	
 	requires org.slf4j.api;
+	requires org.reflections;
+	requires org.eclipse.jface.databinding;
 }

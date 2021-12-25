@@ -2,8 +2,7 @@
 <?eclipse version="4.22"?>
 <plugin>
 
-   <extension
-         point="org.eclipse.ui.commands">
+   <extension point="org.eclipse.ui.commands">
       <category
             id="de.kalinowski.patternizer.commands.category"
             name="Sample Category">
@@ -12,35 +11,33 @@
       <command
             categoryId="de.kalinowski.patternizer.commands.category"
             name="Singleton (Class)"
-            id="de.kalinowski.patternizer.patterns.singleton">
+            id="de.kalinowski.patternizer.patterns.Singleton">
       </command>
       <command
             categoryId="de.kalinowski.patternizer.commands.category"
             name="Builder"
-            id="de.kalinowski.patternizer.patterns.builder">
+            id="de.kalinowski.patternizer.patterns.Builder">
       </command>
    </extension>
    
-   <extension
-         point="org.eclipse.ui.handlers">
+   <extension point="org.eclipse.ui.handlers">
       <handler
-            class="de.patternizer.eclipse.patterns.singleton._Handler_InsertSingleton_Command"
-            commandId="de.kalinowski.patternizer.patterns.singleton">
+            class="de.patternizer.eclipse.patterns._InsertPatternHandler"
+            commandId="de.kalinowski.patternizer.patterns.Singleton">
       </handler>
       <handler
-            class="de.patternizer.eclipse.patterns.builder._Handler_InsertBuilder_Command"
-            commandId="de.kalinowski.patternizer.patterns.builder">
+            class="de.patternizer.eclipse.patterns._InsertPatternHandler"
+            commandId="de.kalinowski.patternizer.patterns.Builder">
       </handler>
    </extension>
-   <extension
-         point="org.eclipse.ui.menus">
-
+   
+   <extension point="org.eclipse.ui.menus">
       <menuContribution locationURI="popup:#CompilationUnitEditorContext?after=org.eclipse.jdt.ui.source.menu">
             <menu label="Insert Design Pattern">
                 <command style="push"
-                         commandId="de.kalinowski.patternizer.patterns.singleton" />
+                         commandId="de.kalinowski.patternizer.patterns.Singleton" />
                 <command style="push"
-                         commandId="de.kalinowski.patternizer.patterns.builder" />
+                         commandId="de.kalinowski.patternizer.patterns.Builder" />
             </menu>
         </menuContribution>
    </extension>

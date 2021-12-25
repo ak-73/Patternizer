@@ -1,4 +1,4 @@
-package de.patternizer.eclipse.patterns.singleton;
+package de.patternizer.eclipse.patterns.builder;
 
 import java.util.List;
 
@@ -14,30 +14,27 @@ import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.IExtendedModifier;
 import org.eclipse.jdt.core.dom.IfStatement;
 import org.eclipse.jdt.core.dom.InfixExpression;
-import org.eclipse.jdt.core.dom.InfixExpression.Operator;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.Modifier;
-import org.eclipse.jdt.core.dom.Modifier.ModifierKeyword;
 import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
+import org.eclipse.jdt.core.dom.InfixExpression.Operator;
+import org.eclipse.jdt.core.dom.Modifier.ModifierKeyword;
 
 import de.patternizer.eclipse.helpers.MethodVisitor;
 import de.patternizer.eclipse.patterns.InsertionHelper;
+import de.patternizer.eclipse.patterns.singleton.SingletonInsertMethod;
+import de.patternizer.eclipse.patterns.singleton.SingletonConfigData;
 
-/**
- * This is a terrible way to manipulate the AST but for a proof-of-concept it should do. Since it's hidden behind an 
- * interface it should be easy enough to implement this via deserialization (plus adaptation) in the future instead.  
- * @author Alexander Kalinowski
- *
- */
-public class InsertSingletonProgrammatically implements ISimpleSingletonInsertionMethod
+public class InsertBuilderProgrammatically implements SingletonInsertMethod
 {
-	// private static Logger logger = LoggerFactory.getLogger(
-	// InsertSingletonProgrammatically.class );
-	// private IWorkbenchWindow window = null;
+
+	
+	
+	
 	
 	//TODO handle case of no explicit constructor defined
 	@Override
@@ -90,7 +87,7 @@ public class InsertSingletonProgrammatically implements ISimpleSingletonInsertio
 	{
 		ICompilationUnit unit = insertionHelper.getICU();
 		AST ast = insertionHelper.getAST();
-		TypeDeclaration singletonTypeDeclaration = insertionHelper.getSingletonTypeDeclaration();
+		TypeDeclaration singletonTypeDeclaration = insertionHelper.getTopClassDeclaration();
 		
 		IType primaryType = unit.findPrimaryType();
 		// TODO Objects.requireNonNull(primaryType);
@@ -127,7 +124,7 @@ public class InsertSingletonProgrammatically implements ISimpleSingletonInsertio
 	{
 		ICompilationUnit unit = insertionHelper.getICU();
 		AST ast = insertionHelper.getAST();
-		TypeDeclaration singletonTypeDeclaration = insertionHelper.getSingletonTypeDeclaration();
+		TypeDeclaration singletonTypeDeclaration = insertionHelper.getTopClassDeclaration();
 		
 		
 		IType primaryType = unit.findPrimaryType();
@@ -175,7 +172,7 @@ public class InsertSingletonProgrammatically implements ISimpleSingletonInsertio
 	{
 		ICompilationUnit unit = insertionHelper.getICU();
 		AST ast = insertionHelper.getAST();
-		TypeDeclaration singletonTypeDeclaration = insertionHelper.getSingletonTypeDeclaration();
+		TypeDeclaration singletonTypeDeclaration = insertionHelper.getTopClassDeclaration();
 		
 		IType primaryType = unit.findPrimaryType();
 		if (primaryType == null) return false;
@@ -214,10 +211,14 @@ public class InsertSingletonProgrammatically implements ISimpleSingletonInsertio
 		}
 		
 		//return statement
-		ReturnStatement returnStatement = ast.newReturnStatement();
-		returnStatement.setExpression(ast.newSimpleName(configData.getSingletonInstanceIdentifier()));
-		QualifiedName holderFieldName = ast.newQualifiedName(ast.newSimpleName("LazyHolder"), ast.newSimpleName(configData.getSingletonInstanceIdentifier()));
-		returnStatement.setExpression(holderFieldName);
+		ReturnStatement returnStatement = ast.newReturnStatement();		
+		if (configData.isHolderInsertion())
+		{
+			QualifiedName holderFieldName = ast.newQualifiedName(ast.newSimpleName("LazyHolder"), ast.newSimpleName(configData.getSingletonInstanceIdentifier()));
+			returnStatement.setExpression(holderFieldName);
+		}
+		else returnStatement.setExpression(ast.newSimpleName(configData.getSingletonInstanceIdentifier()));
+		
 		body.statements().add(returnStatement);
 		
 		getInstantMeth.setBody(body);
@@ -234,3 +235,4 @@ public class InsertSingletonProgrammatically implements ISimpleSingletonInsertio
 	}
 	
 }
+

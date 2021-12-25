@@ -2,7 +2,7 @@ package de.patternizer.eclipse.patterns.singleton;
 
 import de.patternizer.eclipse.patterns.InsertionHelper;
 
-public interface ISimpleSingletonInsertionMethod
+public interface SingletonInsertMethod
 {
 	boolean isSimpleSingletonImplemented();
 	

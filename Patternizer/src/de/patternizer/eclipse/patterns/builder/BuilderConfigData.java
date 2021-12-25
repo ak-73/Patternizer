@@ -1,18 +1,19 @@
-package de.patternizer.eclipse.patterns.singleton;
+package de.patternizer.eclipse.patterns.builder;
 
 import de.patternizer.eclipse.patterns.PatternConfigData;
 import de.patternizer.eclipse.patterns.PatternImplType;
+import de.patternizer.eclipse.patterns.singleton.SingletonInsertMethod;
+import de.patternizer.eclipse.patterns.singleton.SingletonImplTypeHolder;
+import de.patternizer.eclipse.patterns.singleton.SingletonImplTypeLazy;
+import de.patternizer.eclipse.patterns.singleton.SingletonImplTypeSimple;
 
-public class SingletonConfigData extends PatternConfigData
+public class BuilderConfigData extends PatternConfigData
 {
 	private String singletonInstanceIdentifier;
-	private String holderClassIdentifier;
 
 
-	public SingletonConfigData()
+	public BuilderConfigData()
 	{
-		singletonInstanceIdentifier = "_______singletonInstance";
-		holderClassIdentifier = "LazyHolder";
 	}
 	
 
@@ -56,20 +57,6 @@ public class SingletonConfigData extends PatternConfigData
 	public void setSingletonInstanceIdentifier(String singletonInstanceIdentifier)
 	{
 		this.singletonInstanceIdentifier = singletonInstanceIdentifier;
-	}
-
-
-
-	public String getHolderClassIdentifier()
-	{
-		return holderClassIdentifier;
-	}
-
-
-
-	public void setHolderClassIdentifier(String holderClassIdentifier)
-	{
-		this.holderClassIdentifier = holderClassIdentifier;
 	}
 	
 

@@ -1,4 +1,4 @@
-package de.patternizer.eclipse.patterns.singleton;
+package de.patternizer.eclipse.patterns.builder;
 
 import java.util.List;
 
@@ -18,34 +18,28 @@ import org.eclipse.ui.IWorkbenchWindow;
 import de.patternizer.eclipse.patterns.PatternConfigData;
 import de.patternizer.eclipse.patterns.InsertPattern;
 import de.patternizer.eclipse.patterns.InsertionHelper;
+import de.patternizer.eclipse.patterns.PatternImplType;
+import de.patternizer.eclipse.patterns.singleton.SingletonImplTypeHolder;
+import de.patternizer.eclipse.patterns.singleton.SingletonImplTypeLazy;
+import de.patternizer.eclipse.patterns.singleton.SingletonImplTypeSimple;
+import de.patternizer.eclipse.patterns.singleton.SingletonInsertMethodProgrammatically;
+import de.patternizer.eclipse.patterns.singleton.SingletonImplTypeSync;
+import de.patternizer.eclipse.patterns.singleton.SingletonConfigData;
+import de.patternizer.eclipse.patterns.singleton.SingletonConfigPagePlugin;
 import de.patternizer.eclipse.patterns.PatternConfigWizard;
 import de.patternizer.eclipse.patterns.PatternImplManager;
-import de.patternizer.eclipse.patterns.PatternImplType;
 
-/**
- * Responsible for:
- * <ul>
- * <li>managing the Pattern Insertion dialog,</li>
- * <li>applying the appropriate pattern implementation (aka variant of the
- * pattern) to AST; and,</li>
- * <li>writing the AST changes made to file.</li>
- * </ul>
- *
- *
- * @author Alexander Kalinowski
- *
- */
-public class InsertSingleton implements InsertPattern
+public class InsertBuilder implements InsertPattern
 {
 	private IWorkbenchWindow window = null;
 	
-	public InsertSingleton(IWorkbenchWindow window)
+	public InsertBuilder(IWorkbenchWindow window)
 	{
 		this.window = window;
 	}
 	
 	@Override
-	public SingletonConfigData configurePatternInsertion(ExecutionEvent event, List<Class<? extends PatternImplType>> patternImplementations) throws ExecutionException
+	public SingletonConfigData configurePatternInsertion(ExecutionEvent event, List<Class<? extends PatternImplType>> patternImplementations ) throws ExecutionException
 	{
 		SingletonConfigData configData = new SingletonConfigData();
 		configData.setSingletonInstanceIdentifier("_______singletonInstance");
@@ -65,10 +59,10 @@ public class InsertSingleton implements InsertPattern
 		
 		// use inner class to keep parameter lists short and concise
 		InsertionHelper insertionHelper = new InsertionHelper(window);
-		insertionHelper.init(event);
+		insertionHelper.init(event);			
 		
 		Class<? extends PatternImplType> implTypeClass = PatternImplManager.getImplClassByIndex("Singleton", configData.getSelectedImplTypeIndex());
-		PatternImplType singletonImplType = InsertSingleton.createPatternImplType(implTypeClass);
+		PatternImplType singletonImplType = InsertBuilder.createPatternImplType(implTypeClass);
 		
 		singletonImplType.execute(configData, insertionHelper);
 		
@@ -122,14 +116,14 @@ public class InsertSingleton implements InsertPattern
 		}
 	}
 	
-	
 	public static PatternImplType createPatternImplType(Class<? extends PatternImplType> implTypeClass)
 	{
-		if (implTypeClass.getSimpleName().equals("SingletonImplTypeSimple")) return new SingletonImplTypeSimple( new SingletonInsertMethodProgrammatically());
-		else if (implTypeClass.getSimpleName().equals("SingletonImplTypeLazy")) return new SingletonImplTypeLazy( new SingletonInsertMethodProgrammatically()); 
-		else if (implTypeClass.getSimpleName().equals("SingletonImplTypeSync")) return new SingletonImplTypeSync( new SingletonInsertMethodProgrammatically());		
-		else if (implTypeClass.getSimpleName().equals("SingletonImplTypeHolder")) return new SingletonImplTypeHolder( new SingletonInsertMethodProgrammatically());
+		if (implTypeClass.getName().equals("SingletonImplTypeSimple")) return new SingletonImplTypeSimple( new SingletonInsertMethodProgrammatically());
+		else if (implTypeClass.getName().equals("SingletonImplTypeLazy")) return new SingletonImplTypeLazy( new SingletonInsertMethodProgrammatically()); 
+		else if (implTypeClass.getName().equals("SingletonImplTypeSync")) return new SingletonImplTypeSync( new SingletonInsertMethodProgrammatically());		
+		else if (implTypeClass.getName().equals("SingletonImplTypeHolder")) return new SingletonImplTypeHolder( new SingletonInsertMethodProgrammatically());
 
 		return null;
 	}
 }
+
