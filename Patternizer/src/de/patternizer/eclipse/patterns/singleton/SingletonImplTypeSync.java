@@ -1,19 +1,28 @@
 package de.patternizer.eclipse.patterns.singleton;
 
 import de.patternizer.eclipse.patterns.PatternConfigData;
-import de.patternizer.eclipse.patterns.InsertionHelper;
-import de.patternizer.eclipse.patterns.PatternImplType;
+import de.patternizer.eclipse.patterns.helpers.InsertionHelper;
 
-public class SingletonImplTypeSync extends PatternImplType
+public class SingletonImplTypeSync extends SingletonImplType
 {
+	
+	//FIELDS
 	public static int PRIORITY = 6;
 	public static final String DESCRIPTION = "Synchronized (Readable and thread safe but big overhead. Do not use if time-critical!)";
 	
+	
+	
+	
+	//CONSTRUCTORS
 	public SingletonImplTypeSync(SingletonInsertMethod insertionMethod)
 	{
 		super(insertionMethod);
 	}
 	
+	
+	
+	
+	//METHODS
 	@Override
 	public void execute(PatternConfigData configData, InsertionHelper insertionHelper)
 	{
@@ -24,11 +33,9 @@ public class SingletonImplTypeSync extends PatternImplType
 		insertionMethod.addCreateInstanceMethodToAST(insertionHelper, sConfigData);
 	}
 
-	/*
 	@Override
-	public String getDescription()
-	{		
-		return "Synchronized (Readable and thread safe but big overhead. Do not use if time-critical!)";
-	}
-	*/	
+	public boolean isSyncInsertion()
+	{
+		return true;
+	}	
 }

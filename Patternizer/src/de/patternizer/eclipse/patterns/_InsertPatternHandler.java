@@ -11,6 +11,8 @@ import org.eclipse.ui.handlers.HandlerUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import de.patternizer.eclipse.patterns.helpers.PatternImplManager;
+
 /**
  * Entry Point Handler for the Insert <Pattern> command.
  * 
@@ -19,10 +21,15 @@ import org.slf4j.LoggerFactory;
  */
 public class _InsertPatternHandler extends AbstractHandler
 {
+	
+	//FIELDS
 	private static Logger logger = LoggerFactory.getLogger(_InsertPatternHandler.class);
 	private IWorkbenchWindow window = null;
 	public static final String COMMANDPREFIX = "de.kalinowski.patternizer.patterns.";
 	
+
+	
+	//MAIN METHODS
 	@Override
 	public Object execute(ExecutionEvent event) throws ExecutionException
 	{
@@ -44,7 +51,10 @@ public class _InsertPatternHandler extends AbstractHandler
 		return null;
 	}
 
+	
+	
 
+	//HELPER METHODS
 	private InsertPattern getPatternInserter(String patternName)
 	{
 		InsertPattern patternInserter = PatternImplManager.getPatternInsertingInstance(patternName, window);
@@ -56,7 +66,7 @@ public class _InsertPatternHandler extends AbstractHandler
 
 	private List<Class<? extends PatternImplType>> getPatternImplementations(String patternName)
 	{
-		List<Class<? extends PatternImplType>> patternImplementations = PatternImplManager.enumPatternImpls(patternName);
+		List<Class<? extends PatternImplType>> patternImplementations = PatternImplManager.getPatternImplTypeListByPattern(patternName);
 		if (patternImplementations.isEmpty()) throw new IllegalArgumentException("No implementation of the pattern found!");
 		return patternImplementations;
 	}

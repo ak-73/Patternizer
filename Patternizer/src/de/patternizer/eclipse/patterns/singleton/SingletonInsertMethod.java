@@ -1,11 +1,10 @@
 package de.patternizer.eclipse.patterns.singleton;
 
-import de.patternizer.eclipse.patterns.InsertionHelper;
+import de.patternizer.eclipse.patterns.PatternInsertMethod;
+import de.patternizer.eclipse.patterns.helpers.InsertionHelper;
 
-public interface SingletonInsertMethod
+public interface SingletonInsertMethod extends PatternInsertMethod
 {
-	boolean isSimpleSingletonImplemented();
-	
 	void privatizeConstructorsInAST(InsertionHelper insertionHelper);
 	
 	boolean addSingletonFieldToAST(InsertionHelper insertionHelper, SingletonConfigData configData);

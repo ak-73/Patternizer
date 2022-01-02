@@ -18,83 +18,29 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 
+import de.patternizer.eclipse.patterns.helpers.PatternImplManager;
+
 public class PatternConfigPage extends WizardPage
-{	
-	private DataBindingContext dataBindingContext = new DataBindingContext();		
+{
 	
-	private List<Button> radioButtonsPatternImpl = new ArrayList<Button>();
-	
+	// FIELDS
+	private DataBindingContext dataBindingContext = new DataBindingContext();
+	private List<Button> radioButtonsPatternImplList = new ArrayList<Button>();
 	private PatternConfigData patternConfigData;
-	private PatternConfigPagePlugin patternConfigPageHandler = null;
+	private PatternConfigPagePlugin patternConfigPagePlugin = null;
 	private String patternName = "";
 	
+	// CONSTRUCTORS
 	protected PatternConfigPage()
 	{
 		super("Pattern Code Configuration");
 	}
 	
-
-	
-	
-	public PatternConfigData getPatternConfigData()
-	{
-		return patternConfigData;
-	}
-	
-	public void setPatternConfigData(PatternConfigData configData)
-	{
-		this.patternConfigData = configData;
-	}
-	
-	private void initRadioButtons(Group group)
-	{
-		radioButtonsPatternImpl = new ArrayList<Button>();
-		var implTypeList = PatternImplManager.enumPatternImpls(patternName);
-				
-		for (var implType : implTypeList)
-		{
-			String desc = PatternImplManager.getImplDescription(implType);
-			
-			Button radioButton = new Button(group, SWT.RADIO);
-			radioButton.addSelectionListener(new SelectionAdapter()
-			{
-				@Override
-				public void widgetSelected(SelectionEvent e)
-				{}
-			});
-			radioButton.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false, 2, 1));
-			radioButton.setText(desc);
-			radioButtonsPatternImpl.add(radioButton);
-			
-			new Label(group, SWT.NONE);
-		}
-		Button selButton = radioButtonsPatternImpl.get(0);
-		if (selButton != null) selButton.setSelection(true);
-		
-	}
-	
-	private void initRadioButtonsDataBinding(DataBindingContext bindingContext)
-	{		
-		SelectObservableValue<Integer> v = new SelectObservableValue<Integer>(Integer.class);
-		 
-		int index = 0;
-		for (Button b : radioButtonsPatternImpl)
-		{
-			var observeSelectionRadioButtonWidget = WidgetProperties.buttonSelection().observe(b);			
-			v.addOption(index, observeSelectionRadioButtonWidget);	
-			index++;
-		}
-		
-		var temp = PojoProperties.value("selectedImplTypeIndex").observe(patternConfigData);
-		bindingContext.bindValue(v, temp);
-			
-	}
-	
+	// MAIN METHODS
 	@Override
 	public void createControl(Composite parent)
 	{
-		
-		setTitle("Singleton Pattern Code Configuration");
+		setTitle(patternName + " Pattern Code Configuration");
 		setDescription("Configure the generated code here.");
 		
 		Composite composite = new Composite(parent, SWT.NONE);
@@ -108,37 +54,106 @@ public class PatternConfigPage extends WizardPage
 		Label lblNewLabel = new Label(group, SWT.NONE);
 		lblNewLabel.setText("Implementation Type:");
 		new Label(group, SWT.NONE);
-		new Label(group, SWT.NONE);		
+		new Label(group, SWT.NONE);
 		new Label(composite, SWT.NONE);
 		new Label(composite, SWT.NONE);
 		
 		initRadioButtons(group);
-		initRadioButtonsDataBinding(dataBindingContext);	
-				
-		patternConfigPageHandler.init(composite, dataBindingContext, patternConfigData);
+		
+		
+		patternConfigPagePlugin.init(composite, dataBindingContext, patternConfigData);
 	}
 	
-
+	/**
+	 * Create a radio button per enumerated pattern implementation and add it to the
+	 * group. Make the first radio button in the list selected.
+	 * <p> Only displayed if there's at least 2 pattern implementations available.
+	 * 
+	 * @param group the SWT {@code Group} object that will manage the group of radio buttons
+	 */
+	private void initRadioButtons(Group group)
+	{					
+		var implTypeList = PatternImplManager.getPatternImplTypeListByPattern(patternName);
+		if (implTypeList.size() < 2)
+		{ 
+			group.dispose();
+			return;
+		}
+		
+		radioButtonsPatternImplList = new ArrayList<Button>();
+		
+		for (var implType : implTypeList)
+		{
+			String desc = PatternImplManager.getImplDescription(implType);
+			
+			Button radioButton = new Button(group, SWT.RADIO);
+			radioButton.addSelectionListener(new SelectionAdapter()
+			{
+				@Override
+				public void widgetSelected(SelectionEvent e)
+				{}
+			});
+			radioButton.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false, 2, 1));
+			radioButton.setText(desc);
+			radioButtonsPatternImplList.add(radioButton);
+			
+			new Label(group, SWT.NONE);
+		}
+		Button selButton = radioButtonsPatternImplList.get(0);
+		if (selButton != null) selButton.setSelection(true);
+				
+		initRadioButtonsDataBinding();
+	}
+	
+	/**
+	 * Bind the selected radio button to a 0-based index into the list of pattern implementations. 
+	 * @param bindingContext
+	 */
+	private void initRadioButtonsDataBinding()
+	{
+		SelectObservableValue<Integer> v = new SelectObservableValue<Integer>(Integer.class);
+		
+		int index = 0;
+		for (Button b : radioButtonsPatternImplList)
+		{
+			var observeSelectionRadioButtonWidget = WidgetProperties.buttonSelection().observe(b);
+			v.addOption(index, observeSelectionRadioButtonWidget);
+			index++;
+		}
+		
+		var temp = PojoProperties.value("selectedImplTypeIndex").observe(patternConfigData);
+		dataBindingContext.bindValue(v, temp);
+		
+	}
+	
+	// GETTERS & SETTERS
 	public PatternConfigPagePlugin getPatternConfigPageHandler()
 	{
-		return patternConfigPageHandler;
+		return patternConfigPagePlugin;
 	}
-
-
+	
 	public void setPatternConfigPageHandler(PatternConfigPagePlugin patternConfigPageHandler)
 	{
-		this.patternConfigPageHandler = patternConfigPageHandler;
+		this.patternConfigPagePlugin = patternConfigPageHandler;
 	}
-
-
+	
 	public String getPatternName()
 	{
 		return patternName;
 	}
-
-
+	
 	public void setPatternName(String patternName)
 	{
 		this.patternName = patternName;
+	}
+	
+	public PatternConfigData getPatternConfigData()
+	{
+		return patternConfigData;
+	}
+	
+	public void setPatternConfigData(PatternConfigData configData)
+	{
+		this.patternConfigData = configData;
 	}
 }

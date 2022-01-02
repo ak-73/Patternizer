@@ -3,23 +3,13 @@ package de.patternizer.eclipse.patterns.singleton;
 import java.util.List;
 
 import org.eclipse.core.commands.ExecutionEvent;
-import org.eclipse.core.commands.ExecutionException;
-import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.core.dom.CompilationUnit;
-import org.eclipse.jface.text.BadLocationException;
-import org.eclipse.jface.text.Document;
-import org.eclipse.jface.window.Window;
-import org.eclipse.jface.wizard.WizardDialog;
-import org.eclipse.text.edits.MalformedTreeException;
-import org.eclipse.text.edits.TextEdit;
 import org.eclipse.ui.IWorkbenchWindow;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import de.patternizer.eclipse.patterns.PatternConfigData;
 import de.patternizer.eclipse.patterns.InsertPattern;
-import de.patternizer.eclipse.patterns.InsertionHelper;
-import de.patternizer.eclipse.patterns.PatternConfigWizard;
-import de.patternizer.eclipse.patterns.PatternImplManager;
+import de.patternizer.eclipse.patterns.PatternConfigData;
+import de.patternizer.eclipse.patterns.PatternConfigPagePlugin;
 import de.patternizer.eclipse.patterns.PatternImplType;
 
 /**
@@ -35,101 +25,52 @@ import de.patternizer.eclipse.patterns.PatternImplType;
  * @author Alexander Kalinowski
  *
  */
-public class InsertSingleton implements InsertPattern
+public class InsertSingleton extends InsertPattern
 {
-	private IWorkbenchWindow window = null;
 	
-	public InsertSingleton(IWorkbenchWindow window)
+	//FIELDS
+	private static Logger logger = LoggerFactory.getLogger(InsertSingleton.class);
+	
+	
+	
+	//CONSTRUCTORS
+	public InsertSingleton(IWorkbenchWindow window, String patternName)
 	{
-		this.window = window;
+		super(window);
+		this.patternName = patternName;
+	}
+	
+	
+	
+	//METHODS (FACTORY METHODS)	
+	@Override
+	public PatternImplType createPatternImplType(Class<? extends PatternImplType> implTypeClass)
+	{
+		if (implTypeClass.equals(SingletonImplType.class)) throw new IllegalArgumentException("Erroneously attempting to make factory method createPatternImplType() create an instance of the abstract base class " + SingletonImplType.class.getSimpleName() + ".");
+				
+		if (implTypeClass.equals(SingletonImplTypeSimple.class))  return new SingletonImplTypeSimple( new SingletonInsertMethodProgrammatically());
+		else if (implTypeClass.equals(SingletonImplTypeLazy.class))  return new SingletonImplTypeLazy( new SingletonInsertMethodProgrammatically()); 
+		else if (implTypeClass.equals(SingletonImplTypeSync.class))  return new SingletonImplTypeSync( new SingletonInsertMethodProgrammatically());
+		else if (implTypeClass.equals(SingletonImplTypeHolder.class))  return new SingletonImplTypeHolder( new SingletonInsertMethodProgrammatically());
+
+		throw new IllegalArgumentException("Unknown pattern implementation type " + implTypeClass.getSimpleName() + ". Make sure that the appropriate createPatternImplType() method is aware of it.");
 	}
 	
 	@Override
-	public SingletonConfigData configurePatternInsertion(ExecutionEvent event, List<Class<? extends PatternImplType>> patternImplementations) throws ExecutionException
+	public PatternConfigData createConfigData(ExecutionEvent event, List<Class<? extends PatternImplType>> patternImplementations)
 	{
+		logger.info("Insert " + patternName + " pattern has been evoked.");
 		SingletonConfigData configData = new SingletonConfigData();
 		configData.setSingletonInstanceIdentifier("_______singletonInstance");
+		configData.setHolderClassIdentifier("LazyHolder");
 		configData.setImplTypeList(patternImplementations);
-		//InsertSingletonProgrammatically insertionMethod = new InsertSingletonProgrammatically();
-		//configData.setInsertionMethod(insertionMethod);
-		
-		if (!openConfigDialog(event, configData)) return null;
-		
 		return configData;
 	}
 	
 	@Override
-	public void insertPattern(ExecutionEvent event, PatternConfigData configData)
+	public PatternConfigPagePlugin createPatternConfigPagePlugin()
 	{
-		if (!(configData instanceof SingletonConfigData)) return;
-		
-		// use inner class to keep parameter lists short and concise
-		InsertionHelper insertionHelper = new InsertionHelper(window);
-		insertionHelper.init(event);
-		
-		Class<? extends PatternImplType> implTypeClass = PatternImplManager.getImplClassByIndex("Singleton", configData.getSelectedImplTypeIndex());
-		PatternImplType singletonImplType = InsertSingleton.createPatternImplType(implTypeClass);
-		
-		singletonImplType.execute(configData, insertionHelper);
-		
-		writeChangesFromASTToSourceFile(insertionHelper);
+		return new SingletonConfigPagePlugin();
 	}
-	
-	/***
-	 * Returns False, if configuration canceled/aborted. True, otherwise.
-	 */
-	private boolean openConfigDialog(ExecutionEvent event, SingletonConfigData configData) throws ExecutionException
-	{
-		PatternConfigWizard wizard = new PatternConfigWizard();
-		wizard.setPatternConfigData(configData);
-		wizard.setPatternName("Singleton");
-		SingletonConfigPagePlugin configPagePlugin = new SingletonConfigPagePlugin();
-		configData.setPatternConfigPagePlugin(configPagePlugin);
-		wizard.setPatternConfigPageHandler(configPagePlugin);
-		WizardDialog dialog = new WizardDialog(window.getShell(), wizard);
-		dialog.create();
-		dialog.setBlockOnOpen(true);
-		int dialogResult = dialog.open();
-		if (dialogResult != Window.OK) return false;
-		return true;
-	}
-	
-	public void writeChangesFromASTToSourceFile(InsertionHelper insertionHelper)
-	{
-		ICompilationUnit unit = insertionHelper.getICU();
-		CompilationUnit cu = insertionHelper.getCU();
-		Document document = insertionHelper.getDocument();
-		
-		TextEdit edits = cu.rewrite(document, unit.getJavaProject().getOptions(true));
-		try
-		{
-			edits.apply(document);
-			
-			String newSource = document.get();
-			unit.getBuffer().setContents(newSource);
-		}
-		catch (MalformedTreeException e)
-		{
-			// TODO reminder to handle the exceptions; also autoformat the changed file
-		}
-		catch (BadLocationException e)
-		{
-			
-		}
-		catch (JavaModelException e)
-		{
-			
-		}
-	}
-	
-	
-	public static PatternImplType createPatternImplType(Class<? extends PatternImplType> implTypeClass)
-	{
-		if (implTypeClass.getSimpleName().equals("SingletonImplTypeSimple")) return new SingletonImplTypeSimple( new SingletonInsertMethodProgrammatically());
-		else if (implTypeClass.getSimpleName().equals("SingletonImplTypeLazy")) return new SingletonImplTypeLazy( new SingletonInsertMethodProgrammatically()); 
-		else if (implTypeClass.getSimpleName().equals("SingletonImplTypeSync")) return new SingletonImplTypeSync( new SingletonInsertMethodProgrammatically());		
-		else if (implTypeClass.getSimpleName().equals("SingletonImplTypeHolder")) return new SingletonImplTypeHolder( new SingletonInsertMethodProgrammatically());
 
-		return null;
-	}
 }

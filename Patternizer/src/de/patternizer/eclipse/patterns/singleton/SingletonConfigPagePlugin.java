@@ -15,17 +15,25 @@ import de.patternizer.eclipse.patterns.PatternConfigPagePlugin;
 
 public class SingletonConfigPagePlugin extends PatternConfigPagePlugin
 {
+	
+	//FIELDS
 	private Label lblSingletonObjectIdentifier = null;
 	private Text singletonIdentifierText = null;
 	private Label lblHolderIdentifier = null;
 	private Text textHolderIdentifier = null;
 	
 
+	
+	//CONSTRUCTORS
 	public SingletonConfigPagePlugin()
 	{
 		super();		
 	}
 	
+	
+	
+	
+	//METHODS
 	@Override
 	public void initComponents(Composite parentComposite)
 	{
@@ -67,6 +75,7 @@ public class SingletonConfigPagePlugin extends PatternConfigPagePlugin
 		switch(previousCurrentTypeClassname)
 		{
 			case "SingletonImplTypeHolder":
+				lblHolderIdentifier.setEnabled(false);
 				textHolderIdentifier.setEnabled(false);
 				break;	
 		}
@@ -78,6 +87,7 @@ public class SingletonConfigPagePlugin extends PatternConfigPagePlugin
 		switch(newCurrentTypeClassname)
 		{
 			case "SingletonImplTypeHolder":
+				lblHolderIdentifier.setEnabled(true);
 				textHolderIdentifier.setEnabled(true);
 				break;
 		}

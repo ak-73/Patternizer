@@ -1,4 +1,4 @@
-package de.patternizer.eclipse.patterns;
+package de.patternizer.eclipse.patterns.helpers;
 
 import java.util.List;
 
@@ -204,7 +204,7 @@ public class InsertionHelper
 		{
 			SimpleName typeName = typeDeclaration.getName();
 			// TODO check if the underlying assumption for this comparison holds true
-			if (typeName.toString().equals(primaryType.getTypeQualifiedName().toString()))
+			if (typeName.toString().equals(primaryType.getTypeQualifiedName()))
 			{
 				topClassDeclaration = typeDeclaration;
 				break;

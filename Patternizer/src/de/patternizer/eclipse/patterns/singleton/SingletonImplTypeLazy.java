@@ -1,20 +1,28 @@
 package de.patternizer.eclipse.patterns.singleton;
 
 import de.patternizer.eclipse.patterns.PatternConfigData;
-import de.patternizer.eclipse.patterns.PatternImplType;
-import de.patternizer.eclipse.patterns.InsertionHelper;
+import de.patternizer.eclipse.patterns.helpers.InsertionHelper;
 
 
-public class SingletonImplTypeLazy extends PatternImplType
+public class SingletonImplTypeLazy extends SingletonImplType
 {
+	
+	//FIELDS
 	public static int PRIORITY = 4;
 	public static final String DESCRIPTION = "Lazy Initialization (Use for more resource intensive but non-thread safe objects)";
 	
+	
+	
+	//CONSTRUCTORS
 	public SingletonImplTypeLazy(SingletonInsertMethod insertionMethod)
 	{
 		super(insertionMethod);
 	}
 	
+	
+	
+	
+	//METHODS
 	@Override
 	public void execute(PatternConfigData configData, InsertionHelper insertionHelper)
 	{
@@ -25,13 +33,10 @@ public class SingletonImplTypeLazy extends PatternImplType
 		insertionMethod.addCreateInstanceMethodToAST(insertionHelper, sConfigData);
 	}
 	
-	/*
 	@Override
-	public String getDescription()
+	public boolean isLazyInitInsertion()
 	{
-		return "Lazy Initialization (Use for more resource intensive but non-thread safe objects)";
+		return true;
 	}
-	*/
-	
 	
 }

@@ -1,4 +1,4 @@
-package de.patternizer.eclipse.helpers;
+package de.patternizer.eclipse.patterns.helpers;
 
 import java.util.ArrayList;
 import java.util.List;
