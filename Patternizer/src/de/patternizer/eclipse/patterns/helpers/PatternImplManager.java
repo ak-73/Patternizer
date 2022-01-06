@@ -14,26 +14,48 @@ import org.reflections.Reflections;
 
 import de.patternizer.eclipse.patterns.InsertPattern;
 import de.patternizer.eclipse.patterns.PatternImplType;
+import de.patternizer.eclipse.patterns.singleton.SingletonImplTypeLazy;
 
+/**
+ * Responsible for locating (for a given pattern) the entry point class of the
+ * form {@code Insert<Pattern>} as well as all classes for the pattern
+ * implementation variants of the form {@code <Pattern>ImplType<Typename>} by
+ * using {@code org.reflections}.
+ * <p>
+ * Additionally, it implements a {@link Comparator} interface for ordering these
+ * pattern implementations by priority, so that they can be displayed to the
+ * user as a choice in a pre-determined order.
+ * 
+ * @author Alexander Kalinowski
+ *
+ */
 public class PatternImplManager implements Comparator<Class<? extends PatternImplType>>
 {
 	public static final String BASEPACKAGE = "de.patternizer.eclipse.patterns";
 	public static Map<String, List<Class<? extends PatternImplType>>> pattermImpListsByPatternName = new TreeMap<String, List<Class<? extends PatternImplType>>>();
 	
 	/**
+	 * Returns all enumerated pattern implementations. For "Singleton", for example,
+	 * the returned list might contain the {@code Class} objects for
+	 * {@link de.patternizer.eclipse.patterns.singleton.SingletonImplTypeSimple
+	 * SingletonImplTypeSimple}, {@link SingletonImplTypeLazy}, etc.
 	 * 
-	 * @param patternName
-	 * @return A list of all pattern implementation types for the given pattern, ordered by priority. This method will not return null nor an empty list. 
+	 * @param pattern Name name of the pattern ("Singleton", "Builder", etc.)
+	 * @return A list of all pattern implementation types for the given pattern,
+	 *         ordered by priority. This method will not return null nor an empty
+	 *         list.
 	 */
-	public static List<Class<? extends PatternImplType>> getPatternImplTypeListByPattern(String patternName)
+	public static List<Class<? extends PatternImplType>> enumPatternImplTypeListByPattern(String patternName)
 	{
 		if (pattermImpListsByPatternName.containsKey(patternName)) return pattermImpListsByPatternName.get(patternName);
 		
 		Reflections reflections = new Reflections(BASEPACKAGE + "." + patternName.toLowerCase());
 		var implSet = reflections.getSubTypesOf(PatternImplType.class);
 		
-		if (implSet == null) throw new IllegalStateException("Reflections.getSubTypesOf() returned null instead of a list of pattern implementations for pattern " + patternName + ".");
-		if (implSet.isEmpty()) throw new IllegalStateException("Reflections.getSubTypesOf() returned empty list of pattern implementations for pattern " + patternName + ".");
+		if (implSet == null) throw new IllegalStateException(
+				"Reflections.getSubTypesOf() returned null instead of a list of pattern implementations for pattern " + patternName + ".");
+		if (implSet.isEmpty())
+			throw new IllegalStateException("Reflections.getSubTypesOf() returned empty list of pattern implementations for pattern " + patternName + ".");
 		
 		// TODO: research if this is the best way to handle the formatting of fluent
 		// APIs in eclipse without affecting everything else
@@ -45,10 +67,19 @@ public class PatternImplManager implements Comparator<Class<? extends PatternImp
 		//@formatter:on
 		
 		pattermImpListsByPatternName.put(patternName, implList);
-		return implList;		
+		return implList;
 	}
 	
-	
+	/**
+	 * Returns a subclass of an {@code Insert<Pattern>} instance. This instance is
+	 * the central class responsible for inserting a pattern of the given type,
+	 * delegating to {@code <Pattern>ImplType} subclasses as necessary per pattern
+	 * variant (eg, Lazy Singleton, Synchronized Singleton, etc).
+	 * 
+	 * @param patternName
+	 * @param window
+	 * @return
+	 */
 	public static InsertPattern getPatternInsertingInstance(String patternName, IWorkbenchWindow window)
 	{
 		String InsertPatternClassFullyQualifiedName = BASEPACKAGE + "." + patternName.toLowerCase() + ".Insert" + patternName;
@@ -74,22 +105,13 @@ public class PatternImplManager implements Comparator<Class<? extends PatternImp
 	}
 	
 	/**
-	 * <p>
-	 * Gets the {@code index}-th item in our list of enumerated extensions of
-	 * PatternImplType.
+	 * Returns the priority associated with a given pattern implementation, to be
+	 * used for ordering the pattern implementations in a config dialog for the
+	 * user.
 	 * 
-	 * <p>
-	 * Necessary because our config page reports the currently selected
-	 * implementation type by 0-based iinteger index.
+	 * @param implClass {@code Class} object for a given pattern implementation
+	 * @return the priority associated with a given pattern implementation
 	 */
-	public static Class<? extends PatternImplType> getImplClassByIndex(String patternName, int index)
-	{
-		List<Class<? extends PatternImplType>> implList = getPatternImplTypeListByPattern(patternName);
-		Class<? extends PatternImplType> patternImplClass = implList.get(index);
-		
-		return patternImplClass;
-	}
-	
 	private static int getImplPriority(Class<? extends PatternImplType> implClass)
 	{
 		int priority = 10000;
@@ -106,6 +128,14 @@ public class PatternImplManager implements Comparator<Class<? extends PatternImp
 		return priority;
 	}
 	
+	/**
+	 * Returns the description associated with a given pattern implementation, to be
+	 * used for describing the pattern implementations in a config dialog to the
+	 * user.
+	 * 
+	 * @param implClass {@code Class} object for a given pattern implementation
+	 * @return the description associated with a given pattern implementation
+	 */
 	public static String getImplDescription(Class<? extends PatternImplType> implClass)
 	{
 		String desc = "ERROR";
@@ -122,6 +152,10 @@ public class PatternImplManager implements Comparator<Class<? extends PatternImp
 		return desc;
 	}
 	
+	/**
+	 * Compares to pattern implementation according to priority.
+	 * @see #getImplPriority(Class)
+	 */
 	@Override
 	// necessary for .sorted above
 	public int compare(Class<? extends PatternImplType> o1, Class<? extends PatternImplType> o2)

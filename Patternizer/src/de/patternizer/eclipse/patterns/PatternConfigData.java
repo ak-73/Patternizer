@@ -16,6 +16,7 @@ import java.util.List;
  */
 public abstract class PatternConfigData
 {
+	
 	// FIELDS
 	private int selectedImplTypeIndex = 0;
 	private List<Class<? extends PatternImplType>> implTypeList = new ArrayList<Class<? extends PatternImplType>>();
@@ -24,11 +25,12 @@ public abstract class PatternConfigData
 	
 	
 	
+	
 	// METHODS
 	/**
 	 * Get {@link Class} of the currently selected pattern implementation.
 	 * 
-	 * @return {@code Class} of the currently selected pattern implementation. This
+	 * @return {@code Class} of the user-selected pattern implementation. This
 	 *         {@code Class} must be a subclass of {@link PatternImplType}
 	 */
 	public Class<? extends PatternImplType> getSelectedImplTypeClass()
@@ -37,8 +39,7 @@ public abstract class PatternConfigData
 	}
 	
 	/**
-	 * Get the simple name of the currently selected pattern implementation
-	 * {@link Class}
+	 * Get the simple name of the user-selected pattern implementation {@link Class}
 	 * 
 	 * @return {@code String} containing the simple name of the currently selected
 	 *         pattern implementation {@link Class}. This {@code Class} must be a
@@ -73,8 +74,9 @@ public abstract class PatternConfigData
 	 * implementation type is changed by the user, the config dialog must be
 	 * adjusted to take account for implementation type-specific config data.
 	 * Therefore, this method calls
-	 * {@link PatternConfigPagePlugin#updateConfigPage(PatternConfigData, String)}
-	 * to trigger the necessary changes in the GUI.
+	 * {@link PatternConfigPagePlugin#updateConfigPage(PatternConfigData, String)
+	 * PatternConfigPagePlugin#updateConfigPage()}} to trigger the necessary changes
+	 * in the GUI.
 	 * 
 	 * @param selectedImplTypeIndex new value of 0-based index into the list of
 	 *                              available pattern implementation types
@@ -88,8 +90,14 @@ public abstract class PatternConfigData
 	
 	/**
 	 * Setter for the list of enumerated implementation types for the current
-	 * pattern. This method should only be called on freshly constructed
-	 * PatternConfigData objects
+	 * pattern.
+	 * <p>
+	 * Outside of data binding, this method should only be called on freshly
+	 * constructed PatternConfigData objects, as it triggers an update of the config
+	 * dialog, displaying pattern implementation-specific options.
+	 * <p>
+	 * Also, the method will manipulate the {@link #getSelectedImplTypeIndex()
+	 * current selection index} if necessary to keep it within legal bounds.
 	 * 
 	 * @param implTypeList new list of enumerated implementation types for the
 	 *                     current pattern. Must not be null nor empty.
@@ -146,5 +154,5 @@ public abstract class PatternConfigData
 			throw new IllegalStateException("The class of selectedImplTypeInstance does not match the class of getSelectedImplTypeClass()!");
 		this.selectedImplTypeInstance = selectedImplTypeInstance;
 	}
-
+	
 }

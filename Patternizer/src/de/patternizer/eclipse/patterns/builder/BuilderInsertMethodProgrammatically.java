@@ -28,6 +28,8 @@ import de.patternizer.eclipse.patterns.helpers.MethodVisitor;
 
 public class BuilderInsertMethodProgrammatically implements BuilderInsertMethod
 {
+
+	//TODO Tidy this up, just like SingletonInsertMethodProgrammatically
 	
 	BuilderInsertMethodProgrammatically()
 	{
@@ -54,42 +56,51 @@ public class BuilderInsertMethodProgrammatically implements BuilderInsertMethod
 		return ASTManipulationHelper.createClassDeclaration(configData.getBuilderClassIdentifier(), holderModifiers, topClassDeclaration, ast);
 	}
 	
-	@Override
-	public List<FieldDeclaration> getFields(InsertionHelper insertionHelper)
-	{
-		return ASTManipulationHelper.enumAllFields(insertionHelper.getTopClassDeclaration(), insertionHelper);
-	}
 	
 	@Override
-	public void privatizeFields(List<FieldDeclaration> fieldList, InsertionHelper insertionHelper, boolean finalize)
+	public void privatizeAndFinalizeFields(List<FieldDeclaration> fieldList, InsertionHelper insertionHelper)
 	{
-		ASTManipulationHelper.privatizeFields(fieldList, insertionHelper, finalize);
+		ASTManipulationHelper.privatizeFields(fieldList, insertionHelper, true);
 	}
+	
 	
 	@SuppressWarnings("unchecked")
 	@Override
-	public void addFieldsToBuilderClass(TypeDeclaration builderClass, List<FieldDeclaration> fieldList, InsertionHelper insertionHelper, BuilderConfigData configData)
+	public void addFieldsToBuilderClass(TypeDeclaration builderClass, List<FieldDeclaration> fieldList, InsertionHelper insertionHelper,
+			BuilderConfigData configData)
 	{
-		/*
-		 * // the copySubtrees approach does not work // for SOME reason copySubtrees
-		 * does NOT copy modifiers to newFieldList // in spite of promising a deep(!)
-		 * copy of AST subtrees // Modifier is an ASTNode descendant, so it should work.
-		 * Maybe because // IExtendedModifier is not? Weird. // Even worse: when you
-		 * manipulate the copies to have the right modifiers, // writing the AST to file
-		 * produces static nested class modifiers that mirror // the topclass field
-		 * modifiers - in spite of topClassDeclaration.toString() // producing the
-		 * correct results right before writing //List<FieldDeclaration> newFieldList =
-		 * ASTNode.copySubtrees(insertionHelper.getAST(), fieldList);
-		 * builderCLass.bodyDeclarations().addAll(newFieldList); // Safe because at this
-		 * point there are only FieldDeclarations in it: List<FieldDeclaration>
-		 * builderFields = builderCLass.bodyDeclarations();
-		 * 
-		 * for (FieldDeclaration fieldDecl : builderFields) { List<IExtendedModifier>
-		 * modifierList = fieldDecl.modifiers(); modifierList.removeIf(item ->
-		 * item.isModifier() && ((((Modifier) item).isFinal()))); }
-		 */
 		
-		// guessing (correctly) that it has to do with cloning ASTNodes within the same
+		// the copySubtrees approach does not work. for SOME reason copySubtrees does
+		// NOT copy modifiers to newFieldList in spite of promising a deep(!) copy of
+		// AST subtrees. Modifier is an ASTNode descendant, so it should work. Maybe
+		// because IExtendedModifier is not? Weird.
+		//
+		// Even worse: when you manipulate the copies to have the right modifiers,
+		// writing the AST to file produces static nested class modifiers that mirror
+		// the topclass field modifiers - in spite of topClassDeclaration.toString()
+		// producing the correct results right before writing.
+		// for more see here:
+		// https://stackoverflow.com/questions/70591904/unexpected-behaviour-when-writing-modifications-by-astnode-copysubtrees-to-fil?noredirect=1#comment124788732_70591904
+		// and here:
+		// https://bugs.eclipse.org/bugs/show_bug.cgi?id=319448
+		
+		// List<FieldDeclaration> newFieldList =
+		// ASTNode.copySubtrees(insertionHelper.getAST(), fieldList);
+		// builderCLass.bodyDeclarations().addAll(newFieldList);
+		
+		// Safe because at this point there are only FieldDeclarations in it:
+		
+		// List<FieldDeclaration> builderFields = builderCLass.bodyDeclarations();
+		// for (FieldDeclaration fieldDecl : builderFields)
+		// {
+		// List<IExtendedModifier> modifierList = fieldDecl.modifiers();
+		// modifierList.removeIf(item ->item.isModifier() && ((((Modifier)
+		// item).isFinal())));
+		// }
+		
+		
+		// guessing (apparently correctly) that it has to do with cloning ASTNodes
+		// within the same
 		// AST we're cloning to a fresh AST first and then cloning the clones back to
 		// the original AST
 		List<FieldDeclaration> newFieldList = cloneFieldsInSameAST(fieldList, insertionHelper);
@@ -111,12 +122,13 @@ public class BuilderInsertMethodProgrammatically implements BuilderInsertMethod
 				for (VariableDeclarationFragment fragment : fragmentList)
 				{
 					fragment.setInitializer(null);
-				}				
+				}
 			}
 		}
 		
 	}
-
+	
+	@SuppressWarnings("unchecked")
 	private List<FieldDeclaration> cloneFieldsInSameAST(List<FieldDeclaration> fieldList, InsertionHelper insertionHelper)
 	{
 		AST newAST = AST.newAST(insertionHelper.getAST().apiLevel(), false);
@@ -125,15 +137,16 @@ public class BuilderInsertMethodProgrammatically implements BuilderInsertMethod
 		return newFieldList;
 	}
 	
+	/*
+	@SuppressWarnings("unchecked")
 	private List<ASTNode> cloneASTNodeSubtreeInSameAST(List<ASTNode> nodeList, AST oldAST)
 	{
 		AST newAST = AST.newAST(oldAST.apiLevel(), false);
 		List<ASTNode> tempFieldList = ASTNode.copySubtrees(newAST, nodeList);
 		List<ASTNode> newFieldList = ASTNode.copySubtrees(oldAST, tempFieldList);
 		return newFieldList;
-	}
+	}*/
 	
-	@SuppressWarnings("unchecked")
 	private ASTNode cloneASTNodeWithSubtreeInSameAST(ASTNode oldNode, AST oldAST)
 	{
 		AST newAST = AST.newAST(oldAST.apiLevel(), false);
@@ -144,7 +157,8 @@ public class BuilderInsertMethodProgrammatically implements BuilderInsertMethod
 	
 	@SuppressWarnings("unchecked")
 	@Override
-	public void addMethodsToBuilderClass(TypeDeclaration builderClass, List<FieldDeclaration> fieldList, InsertionHelper insertionHelper, BuilderConfigData configData)
+	public void addMethodsToBuilderClass(TypeDeclaration builderClass, List<FieldDeclaration> fieldList, InsertionHelper insertionHelper,
+			BuilderConfigData configData)
 	{
 		AST ast = insertionHelper.getAST();
 		TypeDeclaration topClassDeclaration = insertionHelper.getTopClassDeclaration();
@@ -160,15 +174,17 @@ public class BuilderInsertMethodProgrammatically implements BuilderInsertMethod
 				method.setReturnType2(ast.newSimpleType(ast.newSimpleName(configData.getBuilderClassIdentifier())));
 				List<SingleVariableDeclaration> paramList = new ArrayList<SingleVariableDeclaration>();
 				SingleVariableDeclaration paramDecl = ast.newSingleVariableDeclaration();
-				//Type newType = ast.newSimpleType(ast.newSimpleName(fieldDecl.getType().toString()));
+				// Type newType =
+				// ast.newSimpleType(ast.newSimpleName(fieldDecl.getType().toString()));
 				Type newType = (Type) cloneASTNodeWithSubtreeInSameAST(fieldDecl.getType(), ast);
 				paramDecl.setType(newType);
-				//SimpleName paramName = (SimpleName) cloneASTNodeWithSubtreeInSameAST(fragment.getName(), ast);
+				// SimpleName paramName = (SimpleName)
+				// cloneASTNodeWithSubtreeInSameAST(fragment.getName(), ast);
 				paramDecl.setName(ast.newSimpleName("val"));
 				paramList.add(paramDecl);
 				method.parameters().addAll(paramList);
-								
-				Block methodBody = ast.newBlock();				
+				
+				Block methodBody = ast.newBlock();
 				Assignment assignment = ast.newAssignment();
 				SimpleName fieldName = (SimpleName) cloneASTNodeWithSubtreeInSameAST(fragment.getName(), ast);
 				assignment.setLeftHandSide(fieldName);
@@ -197,15 +213,17 @@ public class BuilderInsertMethodProgrammatically implements BuilderInsertMethod
 		instanceCreation.setType(topClassType);
 		instanceCreation.arguments().add(ast.newThisExpression());
 		ReturnStatement returnStatement = ast.newReturnStatement();
-		returnStatement.setExpression(instanceCreation);		
+		returnStatement.setExpression(instanceCreation);
 		buildMethodBody.statements().add(returnStatement);
 		
 		buildMethod.setBody(buildMethodBody);
 		builderClass.bodyDeclarations().add(buildMethod);
 	}
 	
+	@SuppressWarnings("unchecked")
 	@Override
-	public void addBuilderConstructorToTopClass(TypeDeclaration builderClass, List<FieldDeclaration> fieldList, InsertionHelper insertionHelper, BuilderConfigData configData)
+	public void addBuilderConstructorToTopClass(TypeDeclaration builderClass, List<FieldDeclaration> fieldList, InsertionHelper insertionHelper,
+			BuilderConfigData configData)
 	{
 		AST ast = insertionHelper.getAST();
 		TypeDeclaration topClassDeclaration = insertionHelper.getTopClassDeclaration();
@@ -215,7 +233,7 @@ public class BuilderInsertMethodProgrammatically implements BuilderInsertMethod
 		MethodDeclaration method = ast.newMethodDeclaration();
 		method.setConstructor(true);
 		SimpleName methodName = (SimpleName) cloneASTNodeWithSubtreeInSameAST(topClassDeclaration.getName(), ast);
-		method.setName(methodName);		
+		method.setName(methodName);
 		method.modifiers().add(ast.newModifier(ModifierKeyword.PRIVATE_KEYWORD));
 		List<SingleVariableDeclaration> paramList = new ArrayList<SingleVariableDeclaration>();
 		SingleVariableDeclaration paramDecl = ast.newSingleVariableDeclaration();
@@ -224,44 +242,44 @@ public class BuilderInsertMethodProgrammatically implements BuilderInsertMethod
 		SimpleName paramName = ast.newSimpleName(builderClassAsParamName);
 		paramDecl.setName(paramName);
 		paramList.add(paramDecl);
-		method.parameters().addAll(paramList);	
+		method.parameters().addAll(paramList);
 		
 		
-				
+		
 		Block methodBody = ast.newBlock();
 		for (FieldDeclaration fieldDecl : fieldList)
 		{
 			List<VariableDeclarationFragment> fragmentList = fieldDecl.fragments();
 			for (VariableDeclarationFragment fragment : fragmentList)
 			{
-				Assignment assignment = ast.newAssignment();				
+				Assignment assignment = ast.newAssignment();
 				SimpleName fragmentName = (SimpleName) cloneASTNodeWithSubtreeInSameAST(fragment.getName(), ast);
 				assignment.setLeftHandSide(fragmentName);
 				Name builderFieldName = ast.newName(builderClassAsParamName + "." + fragmentName);
 				assignment.setRightHandSide(builderFieldName);
 				methodBody.statements().add(ast.newExpressionStatement(assignment));
-			}						
+			}
 		}
 		
-		method.setBody(methodBody);		
-		topClassDeclaration.bodyDeclarations().add(method);	
+		method.setBody(methodBody);
+		topClassDeclaration.bodyDeclarations().add(method);
 	}
-
+	
+	@SuppressWarnings("unchecked")
 	@Override
 	public void removeMethodsFromTopClass(List<FieldDeclaration> fieldList, InsertionHelper insertionHelper, BuilderConfigData configData)
 	{
 		CompilationUnit cu = insertionHelper.getCU();
-		AST ast = insertionHelper.getAST();
 		TypeDeclaration topClassDeclaration = insertionHelper.getTopClassDeclaration();
 		
 		MethodVisitor methodVisitor = new MethodVisitor();
 		cu.accept(methodVisitor);
 		
-		List<MethodDeclaration> methodList = methodVisitor.getMethods();				
+		List<MethodDeclaration> methodList = methodVisitor.getMethods();
 		List<MethodDeclaration> killList = new ArrayList<MethodDeclaration>();
 		
 		for (MethodDeclaration method : methodList)
-		{			
+		{
 			if (method.isConstructor())
 			{
 				if (configData.isConstructorsRemoving()) killList.add(method);
@@ -273,7 +291,7 @@ public class BuilderInsertMethodProgrammatically implements BuilderInsertMethod
 			
 			for (FieldDeclaration fieldDecl : fieldList)
 			{
-				List<VariableDeclarationFragment> fragmentList = fieldDecl.fragments();				
+				List<VariableDeclarationFragment> fragmentList = fieldDecl.fragments();
 				for (VariableDeclarationFragment fragment : fragmentList)
 				{
 					String capitalizedFieldName = Character.toUpperCase(fragment.getName().toString().charAt(0)) + fragment.getName().toString().substring(1);
@@ -283,23 +301,23 @@ public class BuilderInsertMethodProgrammatically implements BuilderInsertMethod
 						matched = true;
 						if (configData.isSettersRemoving())
 						{
-							killList.add(method);							
-						}	
-						break;	
-					}					
+							killList.add(method);
+						}
+						break;
+					}
 					if (methodName.equals("get" + capitalizedFieldName))
 					{
 						matched = true;
 						if (configData.isGettersRemoving())
 						{
-							killList.add(method);							
+							killList.add(method);
 						}
-						break;						
-					}															
+						break;
+					}
 				}
 				
 				if (matched) break;
-								
+				
 			}
 			
 			if (!matched && configData.isOtherMethodsRemoving())
@@ -312,9 +330,9 @@ public class BuilderInsertMethodProgrammatically implements BuilderInsertMethod
 		}
 		
 		topClassDeclaration.bodyDeclarations().removeAll(killList);
-				
-
-
+		
+		
+		
 	}
 	
 }

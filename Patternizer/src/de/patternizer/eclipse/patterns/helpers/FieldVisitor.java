@@ -6,6 +6,11 @@ import java.util.List;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
 
+/**
+ * Just visits to add to a {@code List} that can be retrieved.
+ * @author Alexander Kalinowski
+ *
+ */
 public class FieldVisitor extends ASTVisitor
 {
 	List<FieldDeclaration> methods = new ArrayList<>();

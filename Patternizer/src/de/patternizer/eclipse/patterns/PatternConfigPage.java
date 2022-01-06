@@ -20,6 +20,12 @@ import org.eclipse.swt.widgets.Label;
 
 import de.patternizer.eclipse.patterns.helpers.PatternImplManager;
 
+/**
+ * Primary page of the pattern insertion config dialog.
+ * 
+ * @author Alexander Kalinowski
+ * @see PatternConfigWizard
+ */
 public class PatternConfigPage extends WizardPage
 {
 	
@@ -30,13 +36,25 @@ public class PatternConfigPage extends WizardPage
 	private PatternConfigPagePlugin patternConfigPagePlugin = null;
 	private String patternName = "";
 	
+	
+	
 	// CONSTRUCTORS
 	protected PatternConfigPage()
 	{
 		super("Pattern Code Configuration");
 	}
 	
+	
+	
+	
+	
 	// MAIN METHODS
+	/**
+	 * Sets up the dialog page (including any {@link PatternConfigPagePlugin
+	 * optional widgets} for the initially selected pattern implementation) and
+	 * initializes data binding to a previously passed in {@link PatternConfigData}
+	 * subclass instance
+	 */
 	@Override
 	public void createControl(Composite parent)
 	{
@@ -66,16 +84,21 @@ public class PatternConfigPage extends WizardPage
 	
 	/**
 	 * Create a radio button per enumerated pattern implementation and add it to the
-	 * group. Make the first radio button in the list selected.
-	 * <p> Only displayed if there's at least 2 pattern implementations available.
+	 * group. Make the first radio button in the list selected. Finally, bind the
+	 * widgets to data in a previously passed in {@link PatternConfigData} subclass
+	 * instance
+	 * <p>
+	 * Only displayed if there's at least 2 pattern implementations available as
+	 * otherwise there is no choice for the user.
 	 * 
-	 * @param group the SWT {@code Group} object that will manage the group of radio buttons
+	 * @param group the SWT {@code Group} object that will manage the group of radio
+	 *              buttons
 	 */
 	private void initRadioButtons(Group group)
-	{					
-		var implTypeList = PatternImplManager.getPatternImplTypeListByPattern(patternName);
+	{
+		var implTypeList = PatternImplManager.enumPatternImplTypeListByPattern(patternName);
 		if (implTypeList.size() < 2)
-		{ 
+		{
 			group.dispose();
 			return;
 		}
@@ -84,7 +107,7 @@ public class PatternConfigPage extends WizardPage
 		
 		for (var implType : implTypeList)
 		{
-			String desc = PatternImplManager.getImplDescription(implType);
+			String desc = PatternImplManager.getImplDescription(implType); 
 			
 			Button radioButton = new Button(group, SWT.RADIO);
 			radioButton.addSelectionListener(new SelectionAdapter()
@@ -101,12 +124,14 @@ public class PatternConfigPage extends WizardPage
 		}
 		Button selButton = radioButtonsPatternImplList.get(0);
 		if (selButton != null) selButton.setSelection(true);
-				
+		
 		initRadioButtonsDataBinding();
 	}
 	
 	/**
-	 * Bind the selected radio button to a 0-based index into the list of pattern implementations. 
+	 * Bind the selected radio button to a 0-based index into the list of pattern
+	 * implementations.
+	 * 
 	 * @param bindingContext
 	 */
 	private void initRadioButtonsDataBinding()
@@ -126,34 +151,66 @@ public class PatternConfigPage extends WizardPage
 		
 	}
 	
+	
+	
+	
+	
+	
 	// GETTERS & SETTERS
+	/**
+	 * Plain getter.
+	 * @return
+	 */
 	public PatternConfigPagePlugin getPatternConfigPageHandler()
 	{
 		return patternConfigPagePlugin;
 	}
 	
+	/**
+	 * Plain setter.
+	 * @param patternConfigPageHandler
+	 */
 	public void setPatternConfigPageHandler(PatternConfigPagePlugin patternConfigPageHandler)
 	{
 		this.patternConfigPagePlugin = patternConfigPageHandler;
 	}
 	
+	/**
+	 * Plain getter.
+	 * @return
+	 */
 	public String getPatternName()
 	{
 		return patternName;
 	}
 	
+	/**
+	 * Plain setter.
+	 * @param patternName
+	 */
 	public void setPatternName(String patternName)
 	{
 		this.patternName = patternName;
 	}
 	
+	/**
+	 * Plain getter.
+	 * @return
+	 */
 	public PatternConfigData getPatternConfigData()
 	{
 		return patternConfigData;
 	}
 	
+	/**
+	 * Plain setter.
+	 * @param configData
+	 */
 	public void setPatternConfigData(PatternConfigData configData)
 	{
 		this.patternConfigData = configData;
 	}
+	
+	
+	
 }

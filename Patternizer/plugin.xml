@@ -4,30 +4,30 @@
 
    <extension point="org.eclipse.ui.commands">
       <category
-            id="de.kalinowski.patternizer.commands.category"
+            id="de.patternizer.commands.category"
             name="Sample Category">
       </category>
       
       <command
-            categoryId="de.kalinowski.patternizer.commands.category"
+            categoryId="de.patternizer.commands.category"
             name="Singleton (Class)"
-            id="de.kalinowski.patternizer.patterns.Singleton">
+            id="de.patternizer.patterns.Singleton">
       </command>
       <command
-            categoryId="de.kalinowski.patternizer.commands.category"
+            categoryId="de.patternizer.commands.category"
             name="Builder"
-            id="de.kalinowski.patternizer.patterns.Builder">
+            id="de.patternizer.patterns.Builder">
       </command>
    </extension>
    
    <extension point="org.eclipse.ui.handlers">
       <handler
             class="de.patternizer.eclipse.patterns._InsertPatternHandler"
-            commandId="de.kalinowski.patternizer.patterns.Singleton">
+            commandId="de.patternizer.patterns.Singleton">
       </handler>
       <handler
             class="de.patternizer.eclipse.patterns._InsertPatternHandler"
-            commandId="de.kalinowski.patternizer.patterns.Builder">
+            commandId="de.patternizer.patterns.Builder">
       </handler>
    </extension>
    
@@ -35,9 +35,9 @@
       <menuContribution locationURI="popup:#CompilationUnitEditorContext?after=org.eclipse.jdt.ui.source.menu">
             <menu label="Insert Design Pattern">
                 <command style="push"
-                         commandId="de.kalinowski.patternizer.patterns.Singleton" />
+                         commandId="de.patternizer.patterns.Singleton" />
                 <command style="push"
-                         commandId="de.kalinowski.patternizer.patterns.Builder" />
+                         commandId="de.patternizer.patterns.Builder" />
             </menu>
         </menuContribution>
    </extension>

@@ -2,36 +2,28 @@ package de.patternizer.eclipse.patterns.singleton;
 
 import de.patternizer.eclipse.patterns.PatternImplType;
 
+/**
+ * Abstract base class for all singleton implementation inserters that ensures
+ * only {@link SingletonInsertMethod} subclasses will be used for inserting the
+ * singleton pattern to source. 
+ * 
+ * <p>This class follows the naming conventions outlined under
+ * {@link PatternImplType}.
+ * 
+ * @author Alexander Kalinowski
+ *
+ */
 public abstract class SingletonImplType extends PatternImplType
 {
 	protected SingletonInsertMethod insertionMethod = null;
 	
-	//CONSTRUCTORS
+	// CONSTRUCTORS
 	public SingletonImplType(SingletonInsertMethod insertionMethod)
 	{
 		this.insertionMethod = insertionMethod;
 	}
 	
 	
-	//METHODS
-	public boolean isSimpleInsertion()
-	{
-		return false;
-	}
 	
-	public boolean isLazyInitInsertion()
-	{
-		return false;
-	}
-	
-	public boolean isSyncInsertion()
-	{
-		return false;
-	}
-	
-	public boolean isHolderInsertion()
-	{
-		return false;
-	}
 	
 }

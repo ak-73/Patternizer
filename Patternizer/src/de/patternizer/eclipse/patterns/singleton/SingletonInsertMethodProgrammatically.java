@@ -1,6 +1,5 @@
 package de.patternizer.eclipse.patterns.singleton;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -8,13 +7,9 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.Block;
-import org.eclipse.jdt.core.dom.BodyDeclaration;
-import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.IExtendedModifier;
 import org.eclipse.jdt.core.dom.IfStatement;
-import org.eclipse.jdt.core.dom.InfixExpression;
-import org.eclipse.jdt.core.dom.InfixExpression.Operator;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.Modifier.ModifierKeyword;
 import org.eclipse.jdt.core.dom.QualifiedName;
@@ -26,28 +21,36 @@ import de.patternizer.eclipse.patterns.helpers.ASTManipulationHelper;
 import de.patternizer.eclipse.patterns.helpers.InsertionHelper;
 
 /**
- * This is a terrible way to manipulate the AST but for a proof-of-concept it should do. Since it's hidden behind an 
- * interface it should be easy enough to implement this via deserialization (plus adaptation) in the future instead.  
+ * This class manipulates abstract syntax trees <i>programmatically</i> in order
+ * to make changes necessary for inserting various singleton implementations
+ * into source.
+ * 
+ * 
  * @author Alexander Kalinowski
  *
  */
+// (This is an atrocious way to manipulate the AST but for a proof-of-concept it
+// should do. Since it's hidden behind an interface it should be easy enough to
+// implement this via deserialization (plus adaptation) in the future instead.)
 public class SingletonInsertMethodProgrammatically implements SingletonInsertMethod
 {
 	
-	//CONSTRUCTORS
+	// CONSTRUCTORS
 	SingletonInsertMethodProgrammatically()
 	{
 		
 	}
-
 	
 	
 	
 	
-	//METHODS
+	
+	// METHODS (ABSTRACT METHOD IMPLEMENTATIONS)
 	@Override
 	public void privatizeConstructorsInAST(InsertionHelper insertionHelper)
 	{
+		// we're pushing source modifications of a more general nature (useful for many
+		// patterns) into a helper class
 		ASTManipulationHelper.privatizeConstructors(insertionHelper);
 	}
 	
@@ -60,27 +63,26 @@ public class SingletonInsertMethodProgrammatically implements SingletonInsertMet
 		TypeDeclaration topClassDeclaration = insertionHelper.getTopClassDeclaration();
 		SingletonImplType singletonImplType = (SingletonImplType) configData.getSelectedImplTypeInstance();
 		
-		//setup field modifiers and create field declaration
-		List<IExtendedModifier> modifiers = new ArrayList<IExtendedModifier>();	
+		// setup field modifiers and create field declaration
 		boolean defaultInit = false;
-		modifiers.add(ast.newModifier(ModifierKeyword.PRIVATE_KEYWORD));
-		modifiers.add(ast.newModifier(ModifierKeyword.STATIC_KEYWORD));	
-		if (singletonImplType.isSimpleInsertion())
+		List<IExtendedModifier> modifiers = ASTManipulationHelper.createModifierList(ast, ModifierKeyword.PRIVATE_KEYWORD, ModifierKeyword.STATIC_KEYWORD);
+		if (singletonImplType instanceof SingletonImplTypeSimple)
 		{
 			defaultInit = true;
-			modifiers.add(ast.newModifier(ModifierKeyword.FINAL_KEYWORD));			
-		}		
-		FieldDeclaration singletonField = ASTManipulationHelper.createSimpleFieldDeclaration(ast, configData.getSingletonInstanceIdentifier(), topClassDeclaration.getName().toString(), modifiers, defaultInit);
+			modifiers.add(ast.newModifier(ModifierKeyword.FINAL_KEYWORD));
+		}
+		FieldDeclaration singletonField = ASTManipulationHelper.createSimpleFieldDeclaration(ast, configData.getSingletonInstanceIdentifier(),
+				topClassDeclaration.getName().toString(), modifiers, defaultInit);
 		
-		//insertion into AST	
-		@SuppressWarnings("unchecked") //API doc says that's the type
-		List<BodyDeclaration> bDecl = topClassDeclaration.bodyDeclarations();
-		bDecl.add(singletonField);
+		// insertion into AST
+		ASTManipulationHelper.addToType(topClassDeclaration, singletonField);
 		
 		return true;
 	}
-
-
+	
+	
+	
+	
 	
 	@Override
 	public boolean addHolderClassToAST(InsertionHelper insertionHelper, SingletonConfigData configData)
@@ -94,21 +96,22 @@ public class SingletonInsertMethodProgrammatically implements SingletonInsertMet
 		// TODO Objects.requireNonNull(primaryType);
 		if (primaryType == null) return false;
 		
-		//Holder class declaration (plus addition into topclass in helper method)
-		List<IExtendedModifier> holderModifiers = new ArrayList<IExtendedModifier>();	
-		holderModifiers.add(ast.newModifier(ModifierKeyword.PRIVATE_KEYWORD));
-		holderModifiers.add(ast.newModifier(ModifierKeyword.STATIC_KEYWORD));
-		TypeDeclaration holderClass = ASTManipulationHelper.createClassDeclaration(configData.getHolderClassIdentifier(), holderModifiers, topClassDeclaration, ast);	
+		// Holder class declaration (plus addition into topclass in helper method)
+		List<IExtendedModifier> holderModifiers = ASTManipulationHelper.createModifierList(ast, ModifierKeyword.PRIVATE_KEYWORD,
+				ModifierKeyword.STATIC_KEYWORD);
+		TypeDeclaration holderClass = ASTManipulationHelper.createClassDeclaration(configData.getHolderClassIdentifier(), holderModifiers, topClassDeclaration,
+				ast);
 		
-		//static field inside Holder
-		List<IExtendedModifier> holderFieldModifiers = new ArrayList<IExtendedModifier>();
-		holderFieldModifiers.add(ast.newModifier(ModifierKeyword.PRIVATE_KEYWORD));
-		holderFieldModifiers.add(ast.newModifier(ModifierKeyword.STATIC_KEYWORD));	
-		holderFieldModifiers.add(ast.newModifier(ModifierKeyword.FINAL_KEYWORD));		
-		FieldDeclaration singletonField2 = ASTManipulationHelper.createSimpleFieldDeclaration(ast, configData.getSingletonInstanceIdentifier(), topClassDeclaration.getName().toString(), holderFieldModifiers, true);				
-		@SuppressWarnings("unchecked") //API doc says that's the type
-		List<BodyDeclaration> holderDecl = holderClass.bodyDeclarations();
-		holderDecl.add(singletonField2);			
+		// static field inside Holder
+		List<IExtendedModifier> holderFieldModifiers = ASTManipulationHelper.createModifierList(ast, ModifierKeyword.PRIVATE_KEYWORD,
+				ModifierKeyword.STATIC_KEYWORD, ModifierKeyword.FINAL_KEYWORD);
+		FieldDeclaration singletonField = ASTManipulationHelper.createSimpleFieldDeclaration(ast, configData.getSingletonInstanceIdentifier(),
+				topClassDeclaration.getName().toString(), holderFieldModifiers, true);
+		
+		// insertion into Holder
+		ASTManipulationHelper.addToType(holderClass, singletonField);
+		
+		
 		return true;
 	}
 	
@@ -119,57 +122,38 @@ public class SingletonInsertMethodProgrammatically implements SingletonInsertMet
 	public boolean addCreateInstanceMethodToAST(InsertionHelper insertionHelper, SingletonConfigData configData)
 	{
 		AST ast = insertionHelper.getAST();
-		TypeDeclaration topCLassDeclaration = insertionHelper.getTopClassDeclaration();
+		TypeDeclaration topClassDeclaration = insertionHelper.getTopClassDeclaration();
 		SingletonImplType singletonImplType = (SingletonImplType) configData.getSelectedImplTypeInstance();
+		String holderName = configData.getHolderClassIdentifier();
+		String singletonInstanceName = configData.getSingletonInstanceIdentifier();
 		
+		// method declaration
+		MethodDeclaration getInstantMeth = createMethodDeclCreateInstance(ast, configData.getFactoryMethodIdentifier(), topClassDeclaration, singletonImplType);
 		
-		MethodDeclaration getInstantMeth = ast.newMethodDeclaration();
-		getInstantMeth.setName(ast.newSimpleName("_______getInstance"));
-		getInstantMeth.setReturnType2(ast.newSimpleType(ast.newSimpleName(topCLassDeclaration.getName().toString())));
-		getInstantMeth.modifiers().add(ast.newModifier(ModifierKeyword.PUBLIC_KEYWORD));
-		if (singletonImplType.isSyncInsertion()) getInstantMeth.modifiers().add(ast.newModifier(ModifierKeyword.SYNCHRONIZED_KEYWORD));
-		getInstantMeth.modifiers().add(ast.newModifier(ModifierKeyword.STATIC_KEYWORD));
-		
+		// method body
 		Block body = ast.newBlock();
 		
-		//IF statement
-		if (singletonImplType.isLazyInitInsertion() || singletonImplType.isSyncInsertion())
+		// method body: IF statement
+		if (singletonImplType instanceof SingletonImplTypeLazy || singletonImplType instanceof SingletonImplTypeSync)
 		{
-			IfStatement ifStatement = ast.newIfStatement();
-			InfixExpression ifClause = ast.newInfixExpression();
-			SimpleName singletonObjectName = ast.newSimpleName(configData.getSingletonInstanceIdentifier());
-			ifClause.setLeftOperand(singletonObjectName);
-			ifClause.setRightOperand(ast.newNullLiteral());
-			ifClause.setOperator(Operator.EQUALS);
-			ifStatement.setExpression(ifClause);
-			
-			Block ifBlock = ast.newBlock();
-			Assignment assignment = ast.newAssignment();
-			SimpleName singletonObjectName2 = ast.newSimpleName(configData.getSingletonInstanceIdentifier());
-			assignment.setLeftHandSide(singletonObjectName2);
-			assignment.setOperator(Assignment.Operator.ASSIGN);
-			ClassInstanceCreation instanceCreation = ast.newClassInstanceCreation();
-			instanceCreation.setType(ast.newSimpleType(ast.newSimpleName(topCLassDeclaration.getName().toString())));
-			assignment.setRightHandSide(instanceCreation);
-			ifBlock.statements().add(ast.newExpressionStatement(assignment));
-			ifStatement.setThenStatement(ifBlock);		
+			IfStatement ifStatement = createIfStatementInCreateInstanceMethod(ast, singletonInstanceName, topClassDeclaration);
 			body.statements().add(ifStatement);
 		}
 		
-		//return statement
-		ReturnStatement returnStatement = ast.newReturnStatement();		
-		if (singletonImplType.isHolderInsertion())
+		// method body: return statement
+		ReturnStatement returnStatement = ast.newReturnStatement();
+		if (singletonImplType instanceof SingletonImplTypeHolder)
 		{
-			QualifiedName holderFieldName = ast.newQualifiedName(ast.newSimpleName(configData.getHolderClassIdentifier()), ast.newSimpleName(configData.getSingletonInstanceIdentifier()));
+			
+			QualifiedName holderFieldName = ast.newQualifiedName(ast.newSimpleName(holderName), ast.newSimpleName(singletonInstanceName));
 			returnStatement.setExpression(holderFieldName);
 		}
-		else returnStatement.setExpression(ast.newSimpleName(configData.getSingletonInstanceIdentifier()));
-		
+		else returnStatement.setExpression(ast.newSimpleName(singletonInstanceName));
 		body.statements().add(returnStatement);
 		
+		// insertion
 		getInstantMeth.setBody(body);
-		
-		topCLassDeclaration.bodyDeclarations().add(getInstantMeth);
+		topClassDeclaration.bodyDeclarations().add(getInstantMeth);
 		
 		return true;
 	}
@@ -178,15 +162,42 @@ public class SingletonInsertMethodProgrammatically implements SingletonInsertMet
 	
 	
 	
+	// HELPER METHODS
+	@SuppressWarnings("unchecked")
+	private IfStatement createIfStatementInCreateInstanceMethod(AST ast, String singletonInstanceIdentifier, TypeDeclaration topClassDeclaration)
+	{
+		//IF clause
+		SimpleName singletonObjectName = ast.newSimpleName(singletonInstanceIdentifier);
+		IfStatement ifStatement = ASTManipulationHelper.createEqualsIfStatement(ast, singletonObjectName, ast.newNullLiteral());
+		
+		//IF body
+		Block ifBlock = ast.newBlock();
+		Assignment assignment = ASTManipulationHelper.createDefaultConstructorAssignment(ast, singletonInstanceIdentifier, topClassDeclaration);
+		ifBlock.statements().add(ast.newExpressionStatement(assignment));
+		
+		//insertion
+		ifStatement.setThenStatement(ifBlock);
+		return ifStatement;
+	}
 	
 	
-	
-	
-	
-	
-
-
-	
+	@SuppressWarnings("unchecked")
+	private MethodDeclaration createMethodDeclCreateInstance(AST ast, String factoryMethodIdentifier , TypeDeclaration topClassDeclaration, SingletonImplType singletonImplType)
+	{
+		//method name
+		MethodDeclaration getInstantMeth = ast.newMethodDeclaration();
+		getInstantMeth.setName(ast.newSimpleName(factoryMethodIdentifier));
+		
+		//return type
+		getInstantMeth.setReturnType2(ast.newSimpleType(ast.newSimpleName(topClassDeclaration.getName().toString())));
+		
+		//modifiers
+		List<IExtendedModifier> modifiers = ASTManipulationHelper.createModifierList(ast, ModifierKeyword.PUBLIC_KEYWORD, ModifierKeyword.STATIC_KEYWORD);
+		getInstantMeth.modifiers().addAll(modifiers);		
+		if (singletonImplType instanceof SingletonImplTypeSync) getInstantMeth.modifiers().add(ast.newModifier(ModifierKeyword.SYNCHRONIZED_KEYWORD));
+		
+		return getInstantMeth;
+	}
 	
 	
 	

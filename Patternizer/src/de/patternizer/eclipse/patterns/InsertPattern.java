@@ -16,7 +16,6 @@ import org.eclipse.text.edits.TextEdit;
 import org.eclipse.ui.IWorkbenchWindow;
 
 import de.patternizer.eclipse.patterns.helpers.InsertionHelper;
-import de.patternizer.eclipse.patterns.singleton.InsertSingleton;
 
 /**
  * Abstract base class that serves as focal launching point for each featured
@@ -29,13 +28,14 @@ import de.patternizer.eclipse.patterns.singleton.InsertSingleton;
 public abstract class InsertPattern
 {
 	
-	//FIELDS
+	// FIELDS
 	protected IWorkbenchWindow window = null;
 	protected String patternName = "UNDEFINED";
 	
 	
 	
-	//CONSTRUCTORS
+	
+	// CONSTRUCTORS
 	public InsertPattern(IWorkbenchWindow window)
 	{
 		this.window = window;
@@ -44,28 +44,44 @@ public abstract class InsertPattern
 	
 	
 	
-	//ABSTRACT METHODS
+	
+	// ABSTRACT METHODS
 	/**
-	 * Abstract factory method that is responsible for returning an instance of the
-	 * passed {@code Class} parameter.
+	 * Abstract factory method that returns a pattern inserting instance for the
+	 * user selected pattern implementation as denoted by passed
+	 * {@code Class parameter}.
 	 * <p>
-	 * This is required because we enumerate all implementations with
-	 * {@code org.reflections} in a {@code List}, order them by priority and present
-	 * them to the user in the config dialog. The config dialog then returns an
-	 * {@code int}-based 0-index into the list. To actually
-	 * {@link PatternImplType#execute(PatternConfigData, InsertionHelper) execute()}
-	 * the particular pattern insertion, we need an instance - which this factory
-	 * method delivers.
+	 * For example, if the user had opted to insert a singleton pattern in the
+	 * context menu and then selected a lazy initialization singleton pattern in the
+	 * ensuing config dialog, this method would be called on {@code InsertPattern}
+	 * subclass {@link de.patternizer.eclipse.patterns.singleton.InsertSingleton
+	 * InsertSingleton} and return an instance of {@code PatternImplType} subclass
+	 * {@link de.patternizer.eclipse.patterns.singleton.SingletonImplTypeLazy
+	 * SingletonImplTypeLazy}.
+	 * 
+	 * @param implTypeClass a {@code Class} object that denotes the specific
+	 *                      selected pattern implementation
+	 * 						
+	 * @returns an instance of <b>implTypeClass</b> (therefore a subclass of
+	 *          {@link PatternImplType}) responsible for inserting the selected
+	 *          pattern implementation
 	 */
 	public abstract PatternImplType createPatternImplType(Class<? extends PatternImplType> implTypeClass);
 	
 	/**
-	 * Factory method that returns config data of the appropriate subclass, eg.
-	 * {@link de.patternizer.eclipse.patterns.singleton.SingletonConfigData
+	 * Abstract factory method that returns config data of the appropriate subclass,
+	 * eg. {@link de.patternizer.eclipse.patterns.singleton.SingletonConfigData
 	 * SingletonConfigData} for singletons.
 	 * 
-	 * @return A {@link PatternConfigData} subclass that encapsulates data that is
-	 *         relevant specifically to any implementation of that pattern
+	 * @param event                  the Eclipse event that triggered this command
+	 *                               execution
+	 * @param patternImplementations a {@code Class} list of all enumerated classes
+	 *                               that are capable of inserting the user-selected
+	 *                               pattern via a specific implementation (eg, Lazy
+	 *                               Singleton, Synchronized Singleton, etc)
+	 * @return A {@link PatternConfigData} subclass that encapsulates configuration
+	 *         data that is required for inserting a pattern of the user-selected
+	 *         type
 	 */
 	public abstract PatternConfigData createConfigData(ExecutionEvent event, List<Class<? extends PatternImplType>> patternImplementations);
 	
@@ -88,7 +104,9 @@ public abstract class InsertPattern
 	
 	
 	
-	//MAIN METHODS
+	
+	
+	// MAIN METHODS
 	/**
 	 * This method handles the configuration of the pattern insertion, usually by
 	 * opening a config dialog for the user. Most importantly, the configuration
@@ -96,7 +114,8 @@ public abstract class InsertPattern
 	 * vs. lazy initialization singleton vs synchronized singleton, etc) that
 	 * extends {@link PatternImplType}
 	 * 
-	 * @param event
+	 * @param event                  the Eclipse event that triggered this command
+	 *                               execution
 	 * @param patternImplementations
 	 * @return A {@link PatternConfigData} subtype. May return {@code null} in case
 	 *         the user aborts the process in the config dialog or in case of an
@@ -119,8 +138,10 @@ public abstract class InsertPattern
 	 * subclass of {@code PatternImplType} The chosen pattern in the form selected
 	 * during insertion configuration.
 	 * 
-	 * @param event
+	 * @param event      the Eclipse event that triggered this command execution
 	 * @param configData
+	 * @see de.patternizer.eclipse.patterns.singleton.InsertSingleton
+	 *      InsertSingleton for an example implementation
 	 */
 	public void insertPattern(ExecutionEvent event, PatternConfigData configData)
 	{
@@ -137,10 +158,18 @@ public abstract class InsertPattern
 	}
 	
 	
-	//HELPER METHODS
+	
+	
+	
+	
+	// HELPER METHODS
 	/***
-	 * Self-explanatory.
+	 * Opens the pattern insertion config dialog.
 	 * 
+	 * @param event      the Eclipse event that triggered this command execution
+	 * @param configData an instance of a {@code PatternConfigData} subclass (eg,
+	 *                   {@link de.patternizer.eclipse.patterns.singleton.SingletonConfigData
+	 *                   SingletonConfigData} for singleton insertions)
 	 * @return False, if configuration canceled/aborted. True, otherwise.
 	 */
 	private boolean openConfigDialog(ExecutionEvent event, PatternConfigData configData) throws ExecutionException
@@ -160,18 +189,20 @@ public abstract class InsertPattern
 	}
 	
 	/**
-	 * The {@link InsertPattern} subclasses (eg, {@link InsertSingleton} call
-	 * pattern implementation types, which in turn only modify a file's AST in
-	 * memory. This method is responsible for finally writing the changes back into
-	 * the .java file.
+	 * This method is responsible for finally writing any changes made back into the
+	 * .java file. This is necessary because all changes made in
+	 * {@link #insertPattern(ExecutionEvent, PatternConfigData)} prior to calling
+	 * this method only manipulate the AST in memory.
 	 * 
-	 * @param insertionHelper
+	 * @param insertionHelper helper class
 	 */
 	public void writeChangesFromASTToSourceFile(InsertionHelper insertionHelper)
 	{
 		ICompilationUnit unit = insertionHelper.getICU();
 		CompilationUnit cu = insertionHelper.getCU();
-		Document document = insertionHelper.getDocument();		
+		Document document = insertionHelper.getDocument();
+		
+		System.out.println(insertionHelper.getTopClassDeclaration());
 		
 		TextEdit edits = cu.rewrite(document, unit.getJavaProject().getOptions(true));
 		try
@@ -188,6 +219,5 @@ public abstract class InsertPattern
 	}
 	
 	
-
 	
 }

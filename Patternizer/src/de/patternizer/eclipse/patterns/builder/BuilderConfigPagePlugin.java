@@ -13,10 +13,19 @@ import org.eclipse.swt.widgets.Text;
 import de.patternizer.eclipse.patterns.PatternConfigData;
 import de.patternizer.eclipse.patterns.PatternConfigPagePlugin;
 
+/**
+ * This class handles the widgets responsible for configuration of any
+ * Builder-specific config data, such as naming the Builder class or the
+ * build method used to construct an instance of the class we're applying this
+ * pattern to.
+ * 
+ * @author Alexander Kalinowski
+ *
+ */
 public class BuilderConfigPagePlugin extends PatternConfigPagePlugin
 {
 	
-	//FIELDS
+	// FIELDS
 	private Label lblBuilderClassIdentifier = null;
 	private Text textBuilderClassIdentifier = null;
 	private Label lblBuilderMethodIdentifier = null;
@@ -27,18 +36,18 @@ public class BuilderConfigPagePlugin extends PatternConfigPagePlugin
 	private Button btnGettersRemoving = null;
 	private Button btnSettersRemoving = null;
 	private Button btnOtherMethodsRemoving = null;
-
 	
-	//CONSTRUCTORS
+	
+	// CONSTRUCTORS
 	public BuilderConfigPagePlugin()
 	{
-		super();		
+		super();
 	}
 	
 	
 	
 	
-	//METHODS
+	// METHODS
 	@Override
 	public void initComponents(Composite parentComposite)
 	{
@@ -87,7 +96,7 @@ public class BuilderConfigPagePlugin extends PatternConfigPagePlugin
 	{
 		var observeTextBuilderClassIdentifier = WidgetProperties.text(SWT.Modify).observe(textBuilderClassIdentifier);
 		var builderClassIdentifierObserveValue = PojoProperties.value("builderClassIdentifier").observe(configData);
-		dataBindingContext.bindValue(observeTextBuilderClassIdentifier, builderClassIdentifierObserveValue, null, null);	
+		dataBindingContext.bindValue(observeTextBuilderClassIdentifier, builderClassIdentifierObserveValue, null, null);
 		
 		var observeTextBuilderMethodIdentifier = WidgetProperties.text(SWT.Modify).observe(textBuilderMethodIdentifier);
 		var buildMethodIdentifierObserveValue = PojoProperties.value("buildMethodIdentifier").observe(configData);
@@ -108,17 +117,17 @@ public class BuilderConfigPagePlugin extends PatternConfigPagePlugin
 		var observeBtnSettersRemoving = WidgetProperties.buttonSelection().observe(btnSettersRemoving);
 		var settersRemovingObserveValue = PojoProperties.value("settersRemoving").observe(configData);
 		dataBindingContext.bindValue(observeBtnSettersRemoving, settersRemovingObserveValue, null, null);
-				
+		
 		var observeOtherMethodsRemoving = WidgetProperties.buttonSelection().observe(btnOtherMethodsRemoving);
 		var otherMethodsRemovingbserveValue = PojoProperties.value("otherMethodsRemoving").observe(configData);
 		dataBindingContext.bindValue(observeOtherMethodsRemoving, otherMethodsRemovingbserveValue, null, null);
 	}
 	
-
+	
 	@Override
-	protected void cleanUpConfigPage(String previousCurrentTypeClassname)
+	protected void cleanUpConfigPage(String previouslySelectedTypeClassname)
 	{
-		switch(previousCurrentTypeClassname)
+		switch (previouslySelectedTypeClassname)
 		{
 			case "BuilderImplTypeSimple":
 				lblBuilderClassIdentifier.setEnabled(false);
@@ -130,14 +139,14 @@ public class BuilderConfigPagePlugin extends PatternConfigPagePlugin
 				btnGettersRemoving.setEnabled(false);
 				btnSettersRemoving.setEnabled(false);
 				btnOtherMethodsRemoving.setEnabled(false);
-				break;	
+				break;
 		}
 	}
 	
 	@Override
-	protected void setupConfigPage(String newCurrentTypeClassname)
+	protected void setupConfigPage(String newlySelectedTypeClassname)
 	{
-		switch(newCurrentTypeClassname)
+		switch (newlySelectedTypeClassname)
 		{
 			case "BuilderImplTypeSimple":
 				lblBuilderClassIdentifier.setEnabled(true);
@@ -148,9 +157,9 @@ public class BuilderConfigPagePlugin extends PatternConfigPagePlugin
 				btnConstructorsRemoving.setEnabled(true);
 				btnGettersRemoving.setEnabled(true);
 				btnSettersRemoving.setEnabled(true);
-				btnOtherMethodsRemoving.setEnabled(true);				
+				btnOtherMethodsRemoving.setEnabled(true);
 				break;
 		}
 	}
-		
+	
 }

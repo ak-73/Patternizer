@@ -12,28 +12,37 @@ import org.eclipse.swt.widgets.Text;
 import de.patternizer.eclipse.patterns.PatternConfigData;
 import de.patternizer.eclipse.patterns.PatternConfigPagePlugin;
 
-
+/**
+ * This class handles the widgets responsible for configuration of any
+ * singleton-specific config data, such as naming the singleton instance or any
+ * nested holder class.
+ * 
+ * @author Alexander Kalinowski
+ *
+ */
 public class SingletonConfigPagePlugin extends PatternConfigPagePlugin
 {
 	
-	//FIELDS
-	private Label lblSingletonObjectIdentifier = null;
+	// FIELDS
+	private Label lblSingletonObjectIdentifier = null;	
 	private Text singletonIdentifierText = null;
+	private Label lblFactoryMethodIdentifier = null;
+	private Text factoryMethodIdentifierText = null;
 	private Label lblHolderIdentifier = null;
 	private Text textHolderIdentifier = null;
 	
-
 	
-	//CONSTRUCTORS
+	
+	// CONSTRUCTORS
 	public SingletonConfigPagePlugin()
 	{
-		super();		
+		super();
 	}
 	
 	
 	
 	
-	//METHODS
+	// METHODS	
 	@Override
 	public void initComponents(Composite parentComposite)
 	{
@@ -46,6 +55,15 @@ public class SingletonConfigPagePlugin extends PatternConfigPagePlugin
 		singletonIdentifierText.setSelection(0, 100);
 		
 		
+		lblFactoryMethodIdentifier = new Label(parentComposite, SWT.NONE);
+		lblFactoryMethodIdentifier.setText("Factory method identifier:");
+		
+		factoryMethodIdentifierText = new Text(parentComposite, SWT.BORDER);
+		factoryMethodIdentifierText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
+		factoryMethodIdentifierText.setText("_______getInstance");
+		factoryMethodIdentifierText.setSelection(0, 100);
+		
+		
 		lblHolderIdentifier = new Label(parentComposite, SWT.NONE);
 		lblHolderIdentifier.setEnabled(false);
 		lblHolderIdentifier.setText("Holder class identifier:");
@@ -53,7 +71,7 @@ public class SingletonConfigPagePlugin extends PatternConfigPagePlugin
 		textHolderIdentifier = new Text(parentComposite, SWT.BORDER);
 		textHolderIdentifier.setEnabled(false);
 		textHolderIdentifier.setText("LazyHolder");
-		textHolderIdentifier.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));		
+		textHolderIdentifier.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
 	}
 	
 	@Override
@@ -61,30 +79,34 @@ public class SingletonConfigPagePlugin extends PatternConfigPagePlugin
 	{
 		var observeTextSingletonIdentifierTextObserveWidget = WidgetProperties.text(SWT.Modify).observe(singletonIdentifierText);
 		var singletonInstanceIdentifierSingletonConfigDataObserveValue = PojoProperties.value("singletonInstanceIdentifier").observe(configData);
-		dataBindingContext.bindValue(observeTextSingletonIdentifierTextObserveWidget, singletonInstanceIdentifierSingletonConfigDataObserveValue, null, null);	
+		dataBindingContext.bindValue(observeTextSingletonIdentifierTextObserveWidget, singletonInstanceIdentifierSingletonConfigDataObserveValue, null, null);
+		
+		var observeTextFactoryMethodIdentifierObserveWidget = WidgetProperties.text(SWT.Modify).observe(factoryMethodIdentifierText);
+		var factoryMethodIdentifierSingletonConfigDataObserveValue = PojoProperties.value("factoryMethodIdentifier").observe(configData);
+		dataBindingContext.bindValue(observeTextFactoryMethodIdentifierObserveWidget, factoryMethodIdentifierSingletonConfigDataObserveValue, null, null);
 		
 		var observeTextHolderIdentifierObserveWidget = WidgetProperties.text(SWT.Modify).observe(textHolderIdentifier);
 		var holderClassIdentifierSingletonConfigDataObserveValue = PojoProperties.value("holderClassIdentifier").observe(configData);
-		dataBindingContext.bindValue(observeTextHolderIdentifierObserveWidget, holderClassIdentifierSingletonConfigDataObserveValue, null, null);	
+		dataBindingContext.bindValue(observeTextHolderIdentifierObserveWidget, holderClassIdentifierSingletonConfigDataObserveValue, null, null);
 	}
 	
-
+	
 	@Override
-	protected void cleanUpConfigPage(String previousCurrentTypeClassname)
+	protected void cleanUpConfigPage(String previouslySelectedTypeClassname)
 	{
-		switch(previousCurrentTypeClassname)
+		switch (previouslySelectedTypeClassname)
 		{
 			case "SingletonImplTypeHolder":
 				lblHolderIdentifier.setEnabled(false);
 				textHolderIdentifier.setEnabled(false);
-				break;	
+				break;
 		}
 	}
 	
 	@Override
-	protected void setupConfigPage(String newCurrentTypeClassname)
+	protected void setupConfigPage(String newlySelectedTypeClassname)
 	{
-		switch(newCurrentTypeClassname)
+		switch (newlySelectedTypeClassname)
 		{
 			case "SingletonImplTypeHolder":
 				lblHolderIdentifier.setEnabled(true);

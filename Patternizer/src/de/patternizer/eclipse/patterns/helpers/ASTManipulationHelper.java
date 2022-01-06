@@ -1,18 +1,27 @@
 package de.patternizer.eclipse.patterns.helpers;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import org.eclipse.jdt.core.dom.AST;
+import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.BodyDeclaration;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.IExtendedModifier;
+import org.eclipse.jdt.core.dom.IfStatement;
+import org.eclipse.jdt.core.dom.InfixExpression;
+import org.eclipse.jdt.core.dom.InfixExpression.Operator;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.Modifier;
+import org.eclipse.jdt.core.dom.Modifier.ModifierKeyword;
+import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
+
 
 public class ASTManipulationHelper
 {
@@ -27,8 +36,7 @@ public class ASTManipulationHelper
 		//field initializer
 		if (defaultInit)
 		{
-			ClassInstanceCreation instanceCreation = ast.newClassInstanceCreation();
-			instanceCreation.setType(ast.newSimpleType(ast.newSimpleName(fieldtypeName)));
+			ClassInstanceCreation instanceCreation = createClassInstanceCreation(ast, fieldtypeName);
 			fragment.setInitializer(instanceCreation);
 		}
 		else fragment.setInitializer(ast.newNullLiteral());
@@ -43,6 +51,14 @@ public class ASTManipulationHelper
 		modifiers.addAll(newModifiers);
 		
 		return singletonField;
+	}
+
+
+	public static ClassInstanceCreation createClassInstanceCreation(AST ast, String fieldtypeName)
+	{
+		ClassInstanceCreation instanceCreation = ast.newClassInstanceCreation();
+		instanceCreation.setType(ast.newSimpleType(ast.newSimpleName(fieldtypeName)));
+		return instanceCreation;
 	}	
 	
 	
@@ -125,5 +141,47 @@ public class ASTManipulationHelper
 			if (finalize) modifierList.add(insertionHelper.getAST().newModifier(Modifier.ModifierKeyword.FINAL_KEYWORD));
 		}
 	
+	}
+	
+	public static List<IExtendedModifier> createModifierList(AST ast, ModifierKeyword... modifiers)
+	{
+		List<IExtendedModifier> modifierList = new ArrayList<IExtendedModifier>();	
+		
+		for (ModifierKeyword modifier : modifiers)
+		{
+			modifierList.add(ast.newModifier(modifier));
+		}
+		
+		return modifierList;
+	}
+	
+	public static void addToType(TypeDeclaration classDecl, BodyDeclaration bDecl)
+	{
+		@SuppressWarnings("unchecked")
+		List<BodyDeclaration> bodyList = classDecl.bodyDeclarations();
+		bodyList.add(bDecl);
+	}
+	
+	public static IfStatement createEqualsIfStatement(AST ast, Expression leftOperand, Expression rightOperand)
+	{
+		IfStatement ifStatement = ast.newIfStatement();
+		InfixExpression ifClause = ast.newInfixExpression();
+		ifClause.setLeftOperand(leftOperand);
+		ifClause.setRightOperand(rightOperand);
+		ifClause.setOperator(Operator.EQUALS);
+		ifStatement.setExpression(ifClause);
+		return ifStatement;
+	}
+	
+	
+	public static Assignment createDefaultConstructorAssignment(AST ast, String varname, TypeDeclaration topCLassDeclaration)
+	{
+		Assignment assignment = ast.newAssignment();
+		SimpleName singletonObjectName2 = ast.newSimpleName(varname);
+		assignment.setLeftHandSide(singletonObjectName2);
+		assignment.setOperator(Assignment.Operator.ASSIGN);
+		ClassInstanceCreation instanceCreation = ASTManipulationHelper.createClassInstanceCreation(ast, topCLassDeclaration.getName().toString());
+		assignment.setRightHandSide(instanceCreation);
+		return assignment;
 	}
 }

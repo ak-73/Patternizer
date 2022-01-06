@@ -24,6 +24,8 @@ import org.slf4j.LoggerFactory;
 
 public class InsertionHelper
 {
+	
+	// FIELDS
 	private static Logger logger = LoggerFactory.getLogger(InsertionHelper.class);
 	private IWorkbenchWindow window = null;
 	
@@ -33,105 +35,31 @@ public class InsertionHelper
 	private AST ast = null;
 	private TypeDeclaration topClassDeclaration;
 	
+	
+	
+	// CONSTRUCTORS
 	public InsertionHelper(IWorkbenchWindow window)
 	{
 		
 	}
 	
-	void displayErrorDialog(String errorMessage)
-	{
-		if (window != null) MessageDialog.openError(window.getShell(), "Insert Pattern Error!", errorMessage);
-	}
 	
-	public ICompilationUnit getICU()
-	{
-		return icu;
-	}
 	
-	public Document getDocument()
-	{
-		return document;
-	}
 	
-	public CompilationUnit getCU()
-	{
-		return cu;
-	}
 	
-	public AST getAST()
-	{
-		return ast;
-	}
 	
-	public TypeDeclaration getTopClassDeclaration()
-	{
-		return topClassDeclaration;
-	}
 	
-	// just retrieve a Document from an ICompilationUnit, nothing deep
-	private Document initDocument(ICompilationUnit icu)
-	{
-		String source;
-		try
-		{
-			source = icu.getSource();
-		}
-		catch (JavaModelException e)
-		{
-			logger.error("getSource() could not access the associated source: {}", e);
-			return null;
-		}
-		if (source == null)
-		{
-			logger.error("getSource() succeeded but could not find an associated source.");
-			return null;
-		}
-		Document document = new Document(source);
-		return document;
-	}
+	// METHODS
 	
-	// just retrieve a CompilationUnit from an ICompilationUnit, nothing deep either
-	private static CompilationUnit parse(ICompilationUnit unit)
-	{
-		ASTParser parser = ASTParser.newParser(AST.JLS17);
-		parser.setKind(ASTParser.K_COMPILATION_UNIT);
-		parser.setSource(unit);
-		parser.setResolveBindings(true);
-		
-		CompilationUnit cu = (CompilationUnit) parser.createAST(null);
-		return cu; // parse
-	}
-	
-	// just retrieve an ICompilationUnit from an ExecutionEvent, nothing deep either
-	private ICompilationUnit getICompilationUnit(ExecutionEvent event)
-	{
-		ITextEditor editor = (ITextEditor) HandlerUtil.getActiveEditor(event);
-		if (editor == null)
-		{
-			logger.error("getActiveEditor() returned NULL. param event = {}", event);
-			return null;
-		}
-		ITypeRoot typeRoot = JavaUI.getEditorInputTypeRoot(editor.getEditorInput());
-		if (typeRoot == null)
-		{
-			logger.error("getEditorInputTypeRoot({}) returned NULL. subparam editor = {}. editor.getEditorInput() = {}.", editor, editor.getEditorInput());
-			return null;
-		}
-		ICompilationUnit icu = (typeRoot).getAdapter(ICompilationUnit.class);
-		if (icu == null)
-		{
-			logger.error("getAdapter() returned NULL. typeRoot instance = {}.", typeRoot);
-			return null;
-		}
-		return icu;
-	}
-	
+	/**
+	 * Initializes the helper object.
+	 */
 	// just initializing all the members. it all flows from the event object and we
 	// just have to make sure everything is initialized properly
 	// we're logging errors internally as they happen and display a generic error
 	// message to the user
 	// returning a boolean seems quaint but it keeps the central insertPattern()
-	// methods crisp and clean, compared to try-catch. 
+	// methods crisp and clean, compared to try-catch.
 	public boolean init(ExecutionEvent event)
 	{
 		// icu
@@ -185,7 +113,73 @@ public class InsertionHelper
 		return true;
 	}
 	
-	/**
+	
+	//HELPER METHODS
+	private void displayErrorDialog(String errorMessage)
+	{
+		if (window != null) MessageDialog.openError(window.getShell(), "Insert Pattern Error!", errorMessage);
+	}
+	
+	
+	// nothing deep
+	private Document initDocument(ICompilationUnit icu)
+	{
+		String source;
+		try
+		{
+			source = icu.getSource();
+		}
+		catch (JavaModelException e)
+		{
+			logger.error("getSource() could not access the associated source: {}", e);
+			return null;
+		}
+		if (source == null)
+		{
+			logger.error("getSource() succeeded but could not find an associated source.");
+			return null;
+		}
+		Document document = new Document(source);
+		return document;
+	}
+	
+	// nothing deep either
+	private static CompilationUnit parse(ICompilationUnit unit)
+	{
+		ASTParser parser = ASTParser.newParser(AST.JLS17);
+		parser.setKind(ASTParser.K_COMPILATION_UNIT);
+		parser.setSource(unit);
+		parser.setResolveBindings(true);
+		
+		CompilationUnit cu = (CompilationUnit) parser.createAST(null);
+		return cu; // parse
+	}
+	
+	// nothing deep either
+	private ICompilationUnit getICompilationUnit(ExecutionEvent event)
+	{
+		ITextEditor editor = (ITextEditor) HandlerUtil.getActiveEditor(event);
+		if (editor == null)
+		{
+			logger.error("getActiveEditor() returned NULL. param event = {}", event);
+			return null;
+		}
+		ITypeRoot typeRoot = JavaUI.getEditorInputTypeRoot(editor.getEditorInput());
+		if (typeRoot == null)
+		{
+			logger.error("getEditorInputTypeRoot({}) returned NULL. subparam editor = {}. editor.getEditorInput() = {}.", editor, editor.getEditorInput());
+			return null;
+		}
+		ICompilationUnit icu = (typeRoot).getAdapter(ICompilationUnit.class);
+		if (icu == null)
+		{
+			logger.error("getAdapter() returned NULL. typeRoot instance = {}.", typeRoot);
+			return null;
+		}
+		return icu;
+	}
+	
+	/*
 	 * Gets the AST declaration node of the top level class.
 	 */
 	private TypeDeclaration getTopClassDeclaration(ICompilationUnit unit, CompilationUnit cu, AST ast)
@@ -225,4 +219,32 @@ public class InsertionHelper
 		return (TypeDeclaration) topClassDeclaration;
 	}
 	
+	
+	
+	
+	// Getters & Setters
+	public ICompilationUnit getICU()
+	{
+		return icu;
+	}
+	
+	public Document getDocument()
+	{
+		return document;
+	}
+	
+	public CompilationUnit getCU()
+	{
+		return cu;
+	}
+	
+	public AST getAST()
+	{
+		return ast;
+	}
+	
+	public TypeDeclaration getTopClassDeclaration()
+	{
+		return topClassDeclaration;
+	}
 }

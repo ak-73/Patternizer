@@ -6,6 +6,11 @@ import java.util.List;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 
+/**
+ * Just visits to add to a {@code List} that can be retrieved.
+ * @author Alexander Kalinowski
+ *
+ */
 public class MethodVisitor extends ASTVisitor
 {
 	List<MethodDeclaration> methods = new ArrayList<>();
