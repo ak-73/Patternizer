@@ -120,11 +120,12 @@ public class _InsertPatternHandler extends AbstractHandler
 	
 	/**
 	 * Retrieve and store the active workbench window.
+	 * <p>Package-private for unit testing only
 	 * 
 	 * @param event the Eclipse event that triggered this command execution
 	 * @return true if successful, false otherwise
 	 */
-	private boolean initWindow(ExecutionEvent event)
+	boolean initWindow(ExecutionEvent event)
 	{
 		try
 		{
@@ -132,7 +133,7 @@ public class _InsertPatternHandler extends AbstractHandler
 		}
 		catch (ExecutionException e)
 		{
-			logger.error("getActiveWorkbenchWindowChecked() failed.");
+			logger.error("getActiveWorkbenchWindowChecked() in _InsertPatternHandler.initWindow() failed.");
 			return false;
 		}
 		

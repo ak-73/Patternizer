@@ -34,6 +34,8 @@ public class PatternImplManager implements Comparator<Class<? extends PatternImp
 	public static final String BASEPACKAGE = "de.patternizer.eclipse.patterns";
 	public static Map<String, List<Class<? extends PatternImplType>>> pattermImpListsByPatternName = new TreeMap<String, List<Class<? extends PatternImplType>>>();
 	
+	
+	
 	/**
 	 * Returns all enumerated pattern implementations. For "Singleton", for example,
 	 * the returned list might contain the {@code Class} objects for
