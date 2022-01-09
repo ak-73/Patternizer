@@ -174,13 +174,13 @@ public class ASTManipulationHelper
 	}
 	
 	
-	public static Assignment createDefaultConstructorAssignment(AST ast, String varname, TypeDeclaration topCLassDeclaration)
+	public static Assignment createDefaultConstructorAssignment(AST ast, String varname, TypeDeclaration topClassDeclaration)
 	{
 		Assignment assignment = ast.newAssignment();
 		SimpleName singletonObjectName2 = ast.newSimpleName(varname);
 		assignment.setLeftHandSide(singletonObjectName2);
 		assignment.setOperator(Assignment.Operator.ASSIGN);
-		ClassInstanceCreation instanceCreation = ASTManipulationHelper.createClassInstanceCreation(ast, topCLassDeclaration.getName().toString());
+		ClassInstanceCreation instanceCreation = ASTManipulationHelper.createClassInstanceCreation(ast, topClassDeclaration.getName().toString());
 		assignment.setRightHandSide(instanceCreation);
 		return assignment;
 	}

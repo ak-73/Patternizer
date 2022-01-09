@@ -86,6 +86,9 @@ public class InsertSingleton extends InsertPattern
 	@Override	
 	public PatternImplType createPatternImplType(Class<? extends PatternImplType> implTypeClass)
 	{
+		if (implTypeClass.equals(PatternImplType.class)) throw new IllegalArgumentException(
+				"Erroneously attempting to make factory method createPatternImplType() create an instance of the abstract base class "
+						+ PatternImplType.class.getSimpleName() + ".");
 		if (implTypeClass.equals(SingletonImplType.class)) throw new IllegalArgumentException(
 				"Erroneously attempting to make factory method createPatternImplType() create an instance of the abstract base class "
 						+ SingletonImplType.class.getSimpleName() + ".");

@@ -2,8 +2,6 @@ package de.patternizer.eclipse.patterns.singleton;
 
 import java.util.List;
 
-import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.Block;
@@ -87,14 +85,8 @@ public class SingletonInsertMethodProgrammatically implements SingletonInsertMet
 	@Override
 	public boolean addHolderClassToAST(InsertionHelper insertionHelper, SingletonConfigData configData)
 	{
-		ICompilationUnit unit = insertionHelper.getICU();
 		AST ast = insertionHelper.getAST();
 		TypeDeclaration topClassDeclaration = insertionHelper.getTopClassDeclaration();
-		
-		
-		IType primaryType = unit.findPrimaryType();
-		// TODO Objects.requireNonNull(primaryType);
-		if (primaryType == null) return false;
 		
 		// Holder class declaration (plus addition into topclass in helper method)
 		List<IExtendedModifier> holderModifiers = ASTManipulationHelper.createModifierList(ast, ModifierKeyword.PRIVATE_KEYWORD,

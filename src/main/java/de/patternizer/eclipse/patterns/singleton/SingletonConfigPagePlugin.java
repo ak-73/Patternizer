@@ -23,13 +23,13 @@ import de.patternizer.eclipse.patterns.PatternConfigPagePlugin;
 public class SingletonConfigPagePlugin extends PatternConfigPagePlugin
 {
 	
-	// FIELDS
-	private Label lblSingletonObjectIdentifier = null;	
-	private Text singletonIdentifierText = null;
-	private Label lblFactoryMethodIdentifier = null;
-	private Text factoryMethodIdentifierText = null;
-	private Label lblHolderIdentifier = null;
-	private Text textHolderIdentifier = null;
+	// FIELDS (package private for unit testing)
+	Label lblSingletonObjectIdentifier = null;	
+	Text singletonIdentifierText = null;
+	Label lblFactoryMethodIdentifier = null;
+	Text factoryMethodIdentifierText = null;
+	Label lblHolderIdentifier = null;
+	Text textHolderIdentifier = null;
 	
 	
 	

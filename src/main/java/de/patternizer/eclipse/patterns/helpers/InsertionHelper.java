@@ -40,7 +40,7 @@ public class InsertionHelper
 	// CONSTRUCTORS
 	public InsertionHelper(IWorkbenchWindow window)
 	{
-		
+		this.window = window;
 	}
 	
 	
@@ -114,6 +114,61 @@ public class InsertionHelper
 	}
 	
 	
+	public CompilationUnit getCu()
+	{
+		return cu;
+	}
+
+
+
+
+
+
+
+	public void setCu(CompilationUnit cu)
+	{
+		this.cu = cu;
+	}
+
+
+
+
+
+
+
+	public AST getAst()
+	{
+		return ast;
+	}
+
+
+
+
+
+
+
+	public void setAst(AST ast)
+	{
+		this.ast = ast;
+	}
+
+
+
+
+
+
+
+	public void setTopClassDeclaration(TypeDeclaration topClassDeclaration)
+	{
+		this.topClassDeclaration = topClassDeclaration;
+	}
+
+
+
+
+
+
+
 	//HELPER METHODS
 	private void displayErrorDialog(String errorMessage)
 	{

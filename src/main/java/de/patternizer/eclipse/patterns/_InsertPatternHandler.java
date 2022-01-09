@@ -133,7 +133,7 @@ public class _InsertPatternHandler extends AbstractHandler
 		}
 		catch (ExecutionException e)
 		{
-			logger.error("getActiveWorkbenchWindowChecked() in _InsertPatternHandler.initWindow() failed.");
+			logger.error("getActiveWorkbenchWindowChecked() in _InsertPatternHandler.initWindow() failed: " + e.getMessage());
 			return false;
 		}
 		

@@ -16,6 +16,7 @@ import de.patternizer.eclipse.patterns.singleton.SingletonImplTypeHolder;
 class PatternImplManagerTest
 {
 	
+	
 	@Test
 	public void test_enumPatternImplTypeListByPattern_SingletonImplTypeCount()
 	{
