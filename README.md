@@ -26,7 +26,7 @@ pattern you may choose between a simple but non-thread safe implementation or
 an implementation based on the [initialization-on-demand holder] idiom of the 
 Singleton pattern. 
 
-#Notes
+# Notes
 
 This plugin uses Reflections for self-registering new pattern implementations. 
 
