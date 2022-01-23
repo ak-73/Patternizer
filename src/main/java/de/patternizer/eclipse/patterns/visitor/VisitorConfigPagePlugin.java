@@ -60,8 +60,8 @@ public class VisitorConfigPagePlugin extends PatternConfigPagePlugin
 	Label lblVisitorBaseClassdentifier = null;
 	Text visitorBaseClassIdentifierText = null;
 	
-	Label lblVisitorHostBaseClassdentifier = null;
-	Text visitorHostBaseClassIdentifierText = null;
+	Label lblVisiteeBaseClassdentifier = null;
+	Text visiteeBaseClassIdentifierText = null;
 	
 	Label lblVisitorTreeDescriptor = null;
 	Tree tree = null;
@@ -103,7 +103,7 @@ public class VisitorConfigPagePlugin extends PatternConfigPagePlugin
 			{
 				configData.setCurrentTypeGoal(Goal.VISITOR);
 				lblVisitorBaseClassdentifier.setText("Visitor base class:");
-				lblVisitorHostBaseClassdentifier.setText("Visitor host base class:");
+				lblVisiteeBaseClassdentifier.setText("Visitee base class:");
 			}
 		});
 		radioButtonCurrentAsVisitor.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false, 9, 1));
@@ -117,12 +117,17 @@ public class VisitorConfigPagePlugin extends PatternConfigPagePlugin
 			public void widgetSelected(SelectionEvent e)
 			{
 				configData.setCurrentTypeGoal(Goal.VISITEE);
-				lblVisitorBaseClassdentifier.setText("Visitor host base class:");
-				lblVisitorHostBaseClassdentifier.setText("Visitor base class:");
+				lblVisitorBaseClassdentifier.setText("Visitee base class:");
+				lblVisiteeBaseClassdentifier.setText("Visitor base class:");
 			}
 		});
 		radioButtonCurrentAsVisitee.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false, 3, 1));
-		radioButtonCurrentAsVisitee.setText("a Visitee (Visitor Host) class");
+		radioButtonCurrentAsVisitee.setText("a Visitee (Visitor-accepting) class");
+		
+		//TODO implement the switch and remove this
+		visitorVisiteeRBGroup.setEnabled(false);
+		radioButtonCurrentAsVisitor.setEnabled(false);
+		radioButtonCurrentAsVisitee.setEnabled(false);
 		
 		new Label(parentComposite, SWT.NONE);
 		new Label(parentComposite, SWT.NONE);
@@ -190,18 +195,18 @@ public class VisitorConfigPagePlugin extends PatternConfigPagePlugin
 		
 		
 		// Visitee label and text
-		lblVisitorHostBaseClassdentifier = new Label(parentComposite, SWT.NONE);
-		lblVisitorHostBaseClassdentifier.setText("Visitor host base class:              ");
+		lblVisiteeBaseClassdentifier = new Label(parentComposite, SWT.NONE);
+		lblVisiteeBaseClassdentifier.setText("Visitee base class:                  ");
 		
-		visitorHostBaseClassIdentifierText = new Text(parentComposite, SWT.BORDER);
-		visitorHostBaseClassIdentifierText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
-		visitorHostBaseClassIdentifierText.setText("");
-		visitorHostBaseClassIdentifierText.setSelection(0, 100);
+		visiteeBaseClassIdentifierText = new Text(parentComposite, SWT.BORDER);
+		visiteeBaseClassIdentifierText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
+		visiteeBaseClassIdentifierText.setText("");
+		visiteeBaseClassIdentifierText.setSelection(0, 100);
 		
 		// TODO do I even still need this?
 		// CustomContentProposalAdapter contentProposalAdapter =
 		// (CustomContentProposalAdapter)
-		addAutocomplete(visitorHostBaseClassIdentifierText, configData, getParentConfigPage());
+		addAutocomplete(visiteeBaseClassIdentifierText, configData, getParentConfigPage());
 		
 		new Label(parentComposite, SWT.NONE);
 		new Label(parentComposite, SWT.NONE);
@@ -233,7 +238,7 @@ public class VisitorConfigPagePlugin extends PatternConfigPagePlugin
 		
 	}
 	
-	private ContentProposalAdapter addAutocomplete(Text visitorHostBaseClassIdentifierText, VisitorConfigData configData, PatternConfigPage page)
+	private ContentProposalAdapter addAutocomplete(Text visiteeBaseClassIdentifierText, VisitorConfigData configData, PatternConfigPage page)
 	{
 		//@formatter:off		
 		List<String> typeNames = configData.getUnits()
@@ -243,17 +248,17 @@ public class VisitorConfigPagePlugin extends PatternConfigPagePlugin
 		//@formatter:on		
 		SimpleContentProposalProvider propProvider = new SimpleContentProposalProvider((String[]) typeNames.toArray(new String[0]));
 		propProvider.setFiltering(true);
-		CustomContentProposalAdapter contentProposalAdapter = new CustomContentProposalAdapter(visitorHostBaseClassIdentifierText, new TextContentAdapter(),
+		CustomContentProposalAdapter contentProposalAdapter = new CustomContentProposalAdapter(visiteeBaseClassIdentifierText, new TextContentAdapter(),
 				propProvider, null, null);
 		contentProposalAdapter.setProposalAcceptanceStyle(ContentProposalAdapter.PROPOSAL_REPLACE);
 		
-		visitorHostBaseClassIdentifierText.addModifyListener(new ModifyListener()
+		visiteeBaseClassIdentifierText.addModifyListener(new ModifyListener()
 		{
 			@Override
 			public void modifyText(ModifyEvent e)
 			{
 				// TODO Auto-generated method stub
-				String currentText = visitorHostBaseClassIdentifierText.getText();
+				String currentText = visiteeBaseClassIdentifierText.getText();
 				if (currentText.equals(""))
 				{
 					if (tree.getSelectionCount() == 1) page.setPageComplete(true);
@@ -276,7 +281,7 @@ public class VisitorConfigPagePlugin extends PatternConfigPagePlugin
 			
 		});
 		
-		visitorHostBaseClassIdentifierText.addMouseListener(new MouseListener()
+		visiteeBaseClassIdentifierText.addMouseListener(new MouseListener()
 		{
 			
 			@Override
@@ -302,7 +307,7 @@ public class VisitorConfigPagePlugin extends PatternConfigPagePlugin
 			}
 		});
 		
-		visitorHostBaseClassIdentifierText.addFocusListener(new FocusListener()
+		visiteeBaseClassIdentifierText.addFocusListener(new FocusListener()
 		{
 			
 			@Override
