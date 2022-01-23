@@ -37,9 +37,9 @@ public class InsertSingleton extends InsertPattern
 	
 	
 	// CONSTRUCTORS
-	public InsertSingleton(IWorkbenchWindow window, String patternName)
+	public InsertSingleton(ExecutionEvent event, IWorkbenchWindow window, String patternName)
 	{
-		super(window);
+		super(event, window, patternName);
 		this.patternName = patternName;
 	}
 	

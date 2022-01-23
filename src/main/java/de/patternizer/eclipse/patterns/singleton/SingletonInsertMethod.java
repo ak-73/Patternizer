@@ -1,7 +1,7 @@
 package de.patternizer.eclipse.patterns.singleton;
 
 import de.patternizer.eclipse.patterns.PatternInsertMethod;
-import de.patternizer.eclipse.patterns.helpers.InsertionHelper;
+import de.patternizer.eclipse.patterns.helpers.InsertionDataDefault;
 
 /**
  * This interface defines all the methods that need to be implemented in order
@@ -18,7 +18,7 @@ public interface SingletonInsertMethod extends PatternInsertMethod
 	 * Turn all existing constructors in source private.
 	 * @param insertionHelper
 	 */
-	void privatizeConstructorsInAST(InsertionHelper insertionHelper);
+	void privatizeConstructorsInAST(InsertionDataDefault insertionHelper);
 	
 	/**
 	 * Add a static private ("singleton") field to source.
@@ -26,7 +26,7 @@ public interface SingletonInsertMethod extends PatternInsertMethod
 	 * @param configData
 	 * @return
 	 */
-	boolean addSingletonFieldToAST(InsertionHelper insertionHelper, SingletonConfigData configData);
+	boolean addSingletonFieldToAST(InsertionDataDefault insertionHelper, SingletonConfigData configData);
 	
 	/**
 	 * Add a private static holder class that contains a private static field ("singleton") to source.
@@ -34,7 +34,7 @@ public interface SingletonInsertMethod extends PatternInsertMethod
 	 * @param configData
 	 * @return
 	 */
-	boolean addHolderClassToAST(InsertionHelper insertionHelper, SingletonConfigData configData);
+	boolean addHolderClassToAST(InsertionDataDefault insertionHelper, SingletonConfigData configData);
 	
 	/**
 	 * Add a public factory method to source that hands out the singleton object to client code. 
@@ -42,5 +42,5 @@ public interface SingletonInsertMethod extends PatternInsertMethod
 	 * @param configData
 	 * @return
 	 */
-	boolean addCreateInstanceMethodToAST(InsertionHelper insertionHelper, SingletonConfigData configData);
+	boolean addCreateInstanceMethodToAST(InsertionDataDefault insertionHelper, SingletonConfigData configData);
 }

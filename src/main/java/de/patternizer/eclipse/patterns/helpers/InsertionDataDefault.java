@@ -22,24 +22,22 @@ import org.eclipse.ui.texteditor.ITextEditor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class InsertionHelper
+
+//TODO integrate properly with superclass 
+
+public class InsertionDataDefault extends InsertionData
 {
 	
 	// FIELDS
-	private static Logger logger = LoggerFactory.getLogger(InsertionHelper.class);
+	private static Logger logger = LoggerFactory.getLogger(InsertionDataDefault.class);
 	private IWorkbenchWindow window = null;
-	
-	private ICompilationUnit icu = null;
-	private Document document = null;
-	private CompilationUnit cu = null;
-	private AST ast = null;
-	private TypeDeclaration topClassDeclaration;
 	
 	
 	
 	// CONSTRUCTORS
-	public InsertionHelper(IWorkbenchWindow window)
+	public InsertionDataDefault(IWorkbenchWindow window)
 	{
+		super(null);
 		this.window = window;
 	}
 	
@@ -49,8 +47,7 @@ public class InsertionHelper
 	
 	
 	
-	// METHODS
-	
+	// METHODS	
 	/**
 	 * Initializes the helper object.
 	 */
@@ -92,6 +89,30 @@ public class InsertionHelper
 		
 		// ast
 		ast = cu.getAST();
+		/*try
+		{
+			cu.recordModifications();
+		}
+		catch (IllegalArgumentException e)
+		{
+			logger.error("Cannot turn on recording of modifications for compilation unit: " + e.getMessage());
+			displayErrorDialog("Could not parse a valid CompilationUnit object. Execution of the command has been aborted. See log for more details.");
+			return false;
+		}*/
+		
+		classDeclaration = getTopClassDeclaration(icu, cu, ast);
+		if (classDeclaration == null)
+		{
+			displayErrorDialog("Could not parse a valid CompilationUnit object. Execution of the command has been aborted. See log for more details.");
+			return false;
+		}
+		
+		return true;
+	}
+	
+	public boolean recordModifications()
+	{
+		if (cu == null) return false;
 		try
 		{
 			cu.recordModifications();
@@ -102,49 +123,17 @@ public class InsertionHelper
 			displayErrorDialog("Could not parse a valid CompilationUnit object. Execution of the command has been aborted. See log for more details.");
 			return false;
 		}
-		
-		topClassDeclaration = getTopClassDeclaration(icu, cu, ast);
-		if (topClassDeclaration == null)
-		{
-			displayErrorDialog("Could not parse a valid CompilationUnit object. Execution of the command has been aborted. See log for more details.");
-			return false;
-		}
-		
 		return true;
 	}
 	
-	
-	public CompilationUnit getCu()
-	{
-		return cu;
-	}
 
 
 
-
-
-
-
+	//SETTERS (needed for unit testing)
 	public void setCu(CompilationUnit cu)
 	{
 		this.cu = cu;
 	}
-
-
-
-
-
-
-
-	public AST getAst()
-	{
-		return ast;
-	}
-
-
-
-
-
 
 
 	public void setAst(AST ast)
@@ -153,14 +142,9 @@ public class InsertionHelper
 	}
 
 
-
-
-
-
-
-	public void setTopClassDeclaration(TypeDeclaration topClassDeclaration)
+	public void setTopClassDeclaration(TypeDeclaration classDeclaration)
 	{
-		this.topClassDeclaration = topClassDeclaration;
+		this.classDeclaration = classDeclaration;
 	}
 
 
@@ -177,7 +161,7 @@ public class InsertionHelper
 	
 	
 	// nothing deep
-	private Document initDocument(ICompilationUnit icu)
+	public Document initDocument(ICompilationUnit icu)
 	{
 		String source;
 		try
@@ -199,12 +183,14 @@ public class InsertionHelper
 	}
 	
 	// nothing deep either
-	private static CompilationUnit parse(ICompilationUnit unit)
+	public static CompilationUnit parse(ICompilationUnit unit)
 	{
 		ASTParser parser = ASTParser.newParser(AST.JLS17);
 		parser.setKind(ASTParser.K_COMPILATION_UNIT);
 		parser.setSource(unit);
 		parser.setResolveBindings(true);
+        //parser.setStatementsRecovery(true);
+        //parser.setBindingsRecovery(true);
 		
 		CompilationUnit cu = (CompilationUnit) parser.createAST(null);
 		return cu; // parse
@@ -216,19 +202,20 @@ public class InsertionHelper
 		ITextEditor editor = (ITextEditor) HandlerUtil.getActiveEditor(event);
 		if (editor == null)
 		{
-			logger.error("getActiveEditor() returned NULL. param event = {}", event);
+			logger.error("getActiveEditor() returned NULL.\nparam event = {}\n", event);
+			Thread.dumpStack();
 			return null;
 		}
 		ITypeRoot typeRoot = JavaUI.getEditorInputTypeRoot(editor.getEditorInput());
 		if (typeRoot == null)
 		{
-			logger.error("getEditorInputTypeRoot({}) returned NULL. subparam editor = {}. editor.getEditorInput() = {}.", editor, editor.getEditorInput());
+			logger.error("getEditorInputTypeRoot({}) returned NULL.\nsubparam editor = {}.\neditor.getEditorInput() = {}.", editor, editor.getEditorInput());
 			return null;
 		}
 		ICompilationUnit icu = (typeRoot).getAdapter(ICompilationUnit.class);
 		if (icu == null)
 		{
-			logger.error("getAdapter() returned NULL. typeRoot instance = {}.", typeRoot);
+			logger.error("getAdapter() returned NULL.\ntypeRoot instance = {}.", typeRoot);
 			return null;
 		}
 		return icu;
@@ -237,7 +224,7 @@ public class InsertionHelper
 	/*
 	 * Gets the AST declaration node of the top level class.
 	 */
-	private TypeDeclaration getTopClassDeclaration(ICompilationUnit unit, CompilationUnit cu, AST ast)
+	public TypeDeclaration getTopClassDeclaration(ICompilationUnit unit, CompilationUnit cu, AST ast)
 	{
 		IType primaryType = unit.findPrimaryType();
 		if (primaryType == null)
@@ -252,7 +239,6 @@ public class InsertionHelper
 		for (AbstractTypeDeclaration typeDeclaration : typedeclarations)
 		{
 			SimpleName typeName = typeDeclaration.getName();
-			// TODO check if the underlying assumption for this comparison holds true
 			if (typeName.toString().equals(primaryType.getTypeQualifiedName()))
 			{
 				topClassDeclaration = typeDeclaration;
@@ -276,30 +262,5 @@ public class InsertionHelper
 	
 	
 	
-	
-	// Getters & Setters
-	public ICompilationUnit getICU()
-	{
-		return icu;
-	}
-	
-	public Document getDocument()
-	{
-		return document;
-	}
-	
-	public CompilationUnit getCU()
-	{
-		return cu;
-	}
-	
-	public AST getAST()
-	{
-		return ast;
-	}
-	
-	public TypeDeclaration getTopClassDeclaration()
-	{
-		return topClassDeclaration;
-	}
+
 }

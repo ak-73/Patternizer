@@ -36,10 +36,9 @@ public class InsertBuilder extends InsertPattern
 	
 	
 	// CONSTRUCTORS
-	public InsertBuilder(IWorkbenchWindow window, String patternName)
+	public InsertBuilder(ExecutionEvent event, IWorkbenchWindow window, String patternName)
 	{
-		super(window);
-		this.patternName = patternName;
+		super(event, window, patternName);
 	}
 	
 	

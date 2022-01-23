@@ -3,6 +3,8 @@ package de.patternizer.eclipse.patterns;
 import java.util.ArrayList;
 import java.util.List;
 
+import de.patternizer.eclipse.patterns.helpers.SrcCodeModMethod;
+
 /**
  * An abstract base class for pattern-specific config data encapsulated in
  * subclasses. Significantly, it contains a 0-based index into the list of
@@ -16,8 +18,15 @@ import java.util.List;
  */
 public abstract class PatternConfigData
 {
+	// ENUMS
+	/*
+	 * public enum InsertResponsibility { INSERTPATTERNCLASS, CONCRETEPATTERN }
+	 * private InsertResponsibility insertResponsibility =
+	 * InsertResponsibility.INSERTPATTERNCLASS;
+	 */
 	
 	// FIELDS
+	private SrcCodeModMethod patternSpecificModMethod = null;
 	private int selectedImplTypeIndex = 0;
 	private List<Class<? extends PatternImplType>> implTypeList = new ArrayList<Class<? extends PatternImplType>>();
 	private PatternConfigPagePlugin patternConfigPagePlugin = null;
@@ -153,6 +162,39 @@ public abstract class PatternConfigData
 		if (!(selectedImplTypeInstance.getClass().equals(getSelectedImplTypeClass())))
 			throw new IllegalStateException("The class of selectedImplTypeInstance does not match the class of getSelectedImplTypeClass()!");
 		this.selectedImplTypeInstance = selectedImplTypeInstance;
+	}
+	
+	
+	/**
+	 * Plain getter for the way modifications should be recorded and inserted.
+	 * {@code null} means that the {@link InsertPattern} class is responsible (this
+	 * should be the default if you're only modifying the currently active file).
+	 * Any other value encapsulates a method for recording and a method for writing
+	 * via an implementing class of the
+	 * {@link de.patternizer.eclipse.patterns.helpers.SrcCodeModMethod SrcCodeModMethod}
+	 * interface.
+	 * 
+	 * @return a {@link de.patternizer.eclipse.patterns.helpers.SrcCodeModMethod SrcCodeModMethod} implementing class
+	 */
+	public SrcCodeModMethod getPatternSpecificModMethod()
+	{
+		return patternSpecificModMethod;
+	}
+	
+	/**
+	 * Plain setter for the way modifications should be recorded and inserted.
+	 * {@code null} means that the {@link InsertPattern} class is responsible (this
+	 * should be the default if you're only modifying the currently active file).
+	 * Any other value encapsulates a method for recording and a method for writing
+	 * via an implementing class of the
+	 * {@link de.patternizer.eclipse.patterns.helpers.SrcCodeModMethod SrcCodeModMethod}
+	 * interface.
+	 * 
+	 * @param patternSpecificModMethod  a {@link de.patternizer.eclipse.patterns.helpers.SrcCodeModMethod SrcCodeModMethod} implementing class
+	 */
+	public void setPatternSpecificModMethod(SrcCodeModMethod patternSpecificModMethod)
+	{
+		this.patternSpecificModMethod = patternSpecificModMethod;
 	}
 	
 }

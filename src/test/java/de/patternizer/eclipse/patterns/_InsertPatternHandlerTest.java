@@ -53,13 +53,13 @@ public class _InsertPatternHandlerTest
 	@Test
 	public void test_CreateConfigData_CreatesSingletonConfigData()
 	{
-		IWorkbenchWindow window = PlatformUI.getWorkbench().getActiveWorkbenchWindow();
-		InsertPattern patternInserter = PatternImplManager.getPatternInsertingInstance("Singleton", window);
-		
 		Map<String, String> parameters = new HashMap<String, String>();
 		ICommandService commandService = (ICommandService) PlatformUI.getWorkbench().getService(ICommandService.class);
 		Command c = commandService.getCommand("de.patternizer.patterns.Singleton");
 		ExecutionEvent event = new ExecutionEvent(c, parameters, null, null);
+		
+		IWorkbenchWindow window = PlatformUI.getWorkbench().getActiveWorkbenchWindow();
+		InsertPattern patternInserter = PatternImplManager.getPatternInsertingInstance(event, window, "Singleton");		
 		
 		List<Class<? extends PatternImplType>> patternImplementations = PatternImplManager.enumPatternImplTypeListByPattern("Singleton");
 		

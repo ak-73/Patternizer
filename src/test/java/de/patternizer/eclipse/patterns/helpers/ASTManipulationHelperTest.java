@@ -35,7 +35,7 @@ class ASTManipulationHelperTest
 	public ICompilationUnit icu = null;
 	public TypeDeclaration topClassDeclaration = null;
 	
-	InsertionHelper insertionHelperFake = null;
+	InsertionDataDefault insertionHelperFake = null;
 	
 	@BeforeEach
 	public void parseSampleJavaFile()
@@ -64,7 +64,7 @@ class ASTManipulationHelperTest
 		ast = cu.getAST();
 		topClassDeclaration = getTopClassDeclaration("SampleClass", cu, ast);
 		
-		insertionHelperFake = new InsertionHelper(null);
+		insertionHelperFake = new InsertionDataDefault(null);
 		insertionHelperFake.setAst(ast);
 		insertionHelperFake.setCu(cu);
 		insertionHelperFake.setTopClassDeclaration(topClassDeclaration);

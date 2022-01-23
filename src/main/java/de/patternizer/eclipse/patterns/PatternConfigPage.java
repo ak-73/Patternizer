@@ -34,14 +34,19 @@ public class PatternConfigPage extends WizardPage
 	private List<Button> radioButtonsPatternImplList = new ArrayList<Button>();
 	private PatternConfigData patternConfigData;
 	private PatternConfigPagePlugin patternConfigPagePlugin = null;
-	private String patternName = "";
+	private String patternName = "";	
 	
 	
 	
 	// CONSTRUCTORS
-	protected PatternConfigPage()
+	protected PatternConfigPage(PatternConfigData patternConfigData, PatternConfigPagePlugin patternConfigPagePlugin)
 	{
 		super("Pattern Code Configuration");
+		
+		setPatternConfigData(patternConfigData);
+		patternConfigPagePlugin.setParentConfigPage(this);
+		patternConfigPagePlugin.setPatternConfigData(patternConfigData);
+		setPatternConfigPagePlugin(patternConfigPagePlugin);
 	}
 	
 	
@@ -65,18 +70,24 @@ public class PatternConfigPage extends WizardPage
 		setControl(composite);
 		composite.setLayout(new GridLayout(2, false));
 		
-		Group group = new Group(composite, SWT.NONE);
-		group.setLayout(new GridLayout(3, false));
-		group.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false, 2, 6));
+		var implTypeList = PatternImplManager.enumPatternImplTypeListByPattern(patternName);
+		if (implTypeList.size() >= 2)
+		{
+			Group group = new Group(composite, SWT.NONE);
+			group.setLayout(new GridLayout(3, false));
+			group.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false, 2, 6));
+			
+			Label lblNewLabel = new Label(group, SWT.NONE);
+			lblNewLabel.setText("Implementation Type:");
+			new Label(group, SWT.NONE);
+			new Label(group, SWT.NONE);
+			new Label(composite, SWT.NONE);
+			new Label(composite, SWT.NONE);
+			
+			initRadioButtons(group, implTypeList);
+		}
 		
-		Label lblNewLabel = new Label(group, SWT.NONE);
-		lblNewLabel.setText("Implementation Type:");
-		new Label(group, SWT.NONE);
-		new Label(group, SWT.NONE);
-		new Label(composite, SWT.NONE);
-		new Label(composite, SWT.NONE);
 		
-		initRadioButtons(group);
 		
 		
 		patternConfigPagePlugin.init(composite, dataBindingContext, patternConfigData);
@@ -94,15 +105,8 @@ public class PatternConfigPage extends WizardPage
 	 * @param group the SWT {@code Group} object that will manage the group of radio
 	 *              buttons
 	 */
-	private void initRadioButtons(Group group)
-	{
-		var implTypeList = PatternImplManager.enumPatternImplTypeListByPattern(patternName);
-		if (implTypeList.size() < 2)
-		{
-			group.dispose();
-			return;
-		}
-		
+	private void initRadioButtons(Group group, List<Class<? extends PatternImplType>> implTypeList)
+	{				
 		radioButtonsPatternImplList = new ArrayList<Button>();
 		
 		for (var implType : implTypeList)
@@ -161,19 +165,20 @@ public class PatternConfigPage extends WizardPage
 	 * Plain getter.
 	 * @return
 	 */
-	public PatternConfigPagePlugin getPatternConfigPageHandler()
+	public PatternConfigPagePlugin getPatternConfigPagePlugin()
 	{
 		return patternConfigPagePlugin;
 	}
 	
 	/**
 	 * Plain setter.
-	 * @param patternConfigPageHandler
-	 */
-	public void setPatternConfigPageHandler(PatternConfigPagePlugin patternConfigPageHandler)
+	 * @param patternConfigPagePlugin
+	 */	
+	void setPatternConfigPagePlugin(PatternConfigPagePlugin patternConfigPagePlugin)
 	{
-		this.patternConfigPagePlugin = patternConfigPageHandler;
+		this.patternConfigPagePlugin = patternConfigPagePlugin;
 	}
+	
 	
 	/**
 	 * Plain getter.
@@ -206,7 +211,7 @@ public class PatternConfigPage extends WizardPage
 	 * Plain setter.
 	 * @param configData
 	 */
-	public void setPatternConfigData(PatternConfigData configData)
+	void setPatternConfigData(PatternConfigData configData)
 	{
 		this.patternConfigData = configData;
 	}

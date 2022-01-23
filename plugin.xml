@@ -10,13 +10,18 @@
       
       <command
             categoryId="de.patternizer.commands.category"
-            name="Singleton (Class)"
+            name="Singleton"
             id="de.patternizer.patterns.Singleton">
       </command>
       <command
             categoryId="de.patternizer.commands.category"
             name="Builder"
             id="de.patternizer.patterns.Builder">
+      </command>
+      <command
+            categoryId="de.patternizer.commands.category"
+            name="Visitor"
+            id="de.patternizer.patterns.Visitor">
       </command>
    </extension>
    
@@ -29,6 +34,10 @@
             class="de.patternizer.eclipse.patterns._InsertPatternHandler"
             commandId="de.patternizer.patterns.Builder">
       </handler>
+      <handler
+            class="de.patternizer.eclipse.patterns._InsertPatternHandler"
+            commandId="de.patternizer.patterns.Visitor">
+      </handler>
    </extension>
    
    <extension point="org.eclipse.ui.menus">
@@ -38,6 +47,8 @@
                          commandId="de.patternizer.patterns.Singleton" />
                 <command style="push"
                          commandId="de.patternizer.patterns.Builder" />
+                <command style="push"
+                         commandId="de.patternizer.patterns.Visitor" />
             </menu>
         </menuContribution>
    </extension>

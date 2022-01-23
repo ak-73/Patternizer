@@ -28,9 +28,7 @@ public class PatternConfigWizard extends Wizard
 	@Override
 	public void addPages()
 	{
-		patternConfigPage = new PatternConfigPage();
-		patternConfigPage.setPatternConfigData(patternConfigData);
-		patternConfigPage.setPatternConfigPageHandler(patternConfigPagePlugin);
+		patternConfigPage = new PatternConfigPage(patternConfigData, patternConfigPagePlugin);
 		patternConfigPage.setPatternName(patternName);
 		addPage(patternConfigPage);
 	}
@@ -68,7 +66,7 @@ public class PatternConfigWizard extends Wizard
 	 * Plain getter.
 	 * @return
 	 */
-	public PatternConfigPagePlugin getPatternConfigPageHandler()
+	public PatternConfigPagePlugin getPatternConfigPagePlugin()
 	{
 		return patternConfigPagePlugin;
 	}
@@ -77,7 +75,7 @@ public class PatternConfigWizard extends Wizard
 	 * Plain setter.
 	 * @param patternConfigPagePlugin
 	 */
-	public void setPatternConfigPageHandler(PatternConfigPagePlugin patternConfigPagePlugin)
+	public void setPatternConfigPagePlugin(PatternConfigPagePlugin patternConfigPagePlugin)
 	{
 		this.patternConfigPagePlugin = patternConfigPagePlugin;
 	}

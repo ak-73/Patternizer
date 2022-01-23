@@ -41,7 +41,6 @@ public class BuilderConfigPagePlugin extends PatternConfigPagePlugin
 	// CONSTRUCTORS
 	public BuilderConfigPagePlugin()
 	{
-		super();
 	}
 	
 	
@@ -130,6 +129,7 @@ public class BuilderConfigPagePlugin extends PatternConfigPagePlugin
 		switch (previouslySelectedTypeClassname)
 		{
 			case "BuilderImplTypeSimple":
+				if (lblBuilderClassIdentifier == null) return; //TODO untidy shortcut! 
 				lblBuilderClassIdentifier.setEnabled(false);
 				textBuilderClassIdentifier.setEnabled(false);
 				lblBuilderMethodIdentifier.setEnabled(false);
@@ -149,6 +149,7 @@ public class BuilderConfigPagePlugin extends PatternConfigPagePlugin
 		switch (newlySelectedTypeClassname)
 		{
 			case "BuilderImplTypeSimple":
+				if (lblBuilderClassIdentifier == null) return; //TODO untidy shortcut! 
 				lblBuilderClassIdentifier.setEnabled(true);
 				textBuilderClassIdentifier.setEnabled(true);
 				lblBuilderMethodIdentifier.setEnabled(true);

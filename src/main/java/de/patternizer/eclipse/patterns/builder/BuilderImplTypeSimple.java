@@ -7,7 +7,7 @@ import org.eclipse.jdt.core.dom.TypeDeclaration;
 
 import de.patternizer.eclipse.patterns.PatternConfigData;
 import de.patternizer.eclipse.patterns.helpers.ASTManipulationHelper;
-import de.patternizer.eclipse.patterns.helpers.InsertionHelper;
+import de.patternizer.eclipse.patterns.helpers.InsertionDataDefault;
 
 /**
  * This class uses an instance of a {@link BuilderInsertMethod} subclass to
@@ -21,7 +21,7 @@ public class BuilderImplTypeSimple extends BuilderImplType
 	
 	// FIELDS
 	public static int PRIORITY = 2;
-	public static final String DESCRIPTION = "Simple (Readable but for non-thread safe, non-resource intensive objects only)";
+	public static final String DESCRIPTION = "Simple";
 	
 	
 	
@@ -42,13 +42,13 @@ public class BuilderImplTypeSimple extends BuilderImplType
 	 * appropriate order.
 	 */
 	@Override
-	public void execute(PatternConfigData configData, InsertionHelper insertionHelper)
+	public void execute(PatternConfigData configData, InsertionDataDefault insertionHelper)
 	{
 		if (!(configData instanceof BuilderConfigData)) return;
 		BuilderConfigData bConfigData = (BuilderConfigData) configData;
 		
 		if (!bConfigData.isConstructorsRemoving()) insertionMethod.privatizeConstructorsInAST(insertionHelper);
-		List<FieldDeclaration> topClassFieldList = ASTManipulationHelper.enumAllFields(insertionHelper.getTopClassDeclaration(), insertionHelper);
+		List<FieldDeclaration> topClassFieldList = ASTManipulationHelper.enumAllFields(insertionHelper.getClassDeclaration(), insertionHelper);
 		insertionMethod.privatizeAndFinalizeFields(topClassFieldList, insertionHelper);
 		if (bConfigData.isSettersRemoving()) insertionMethod.removeMethodsFromTopClass(topClassFieldList, insertionHelper, bConfigData);
 		TypeDeclaration builderCLass = insertionMethod.addBuilderClassToAST(insertionHelper, bConfigData);

@@ -27,16 +27,15 @@ public abstract class PatternConfigPagePlugin
 	
 	// FIELDS
 	private Composite parentComposite = null;
-	
+	private PatternConfigPage parentConfigPage = null;
+	private PatternConfigData patternConfigData;	
 	
 	
 	
 	// CONSTRUCTORS
 	public PatternConfigPagePlugin()
 	{
-		super();
 	}
-	
 	
 	
 	
@@ -100,6 +99,28 @@ public abstract class PatternConfigPagePlugin
 		cleanUpConfigPage(previouslySelectedTypeClassname);
 		setupConfigPage(configData.getSelectedImplTypeClassname());
 	}
-	
+
+
+
+	//GETTERS & SETTERS
+	public PatternConfigPage getParentConfigPage()
+	{
+		return parentConfigPage;
+	}
+
+	public void setParentConfigPage(PatternConfigPage parentConfigPage)
+	{
+		this.parentConfigPage = parentConfigPage;
+	}
+
+	public PatternConfigData getPatternConfigData()
+	{
+		return patternConfigData;
+	}
+
+	public void setPatternConfigData(PatternConfigData patternConfigData)
+	{
+		this.patternConfigData = patternConfigData;
+	}
 	
 }

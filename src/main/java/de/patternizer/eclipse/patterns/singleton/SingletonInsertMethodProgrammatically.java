@@ -16,7 +16,7 @@ import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 
 import de.patternizer.eclipse.patterns.helpers.ASTManipulationHelper;
-import de.patternizer.eclipse.patterns.helpers.InsertionHelper;
+import de.patternizer.eclipse.patterns.helpers.InsertionDataDefault;
 
 /**
  * This class manipulates abstract syntax trees <i>programmatically</i> in order
@@ -45,7 +45,7 @@ public class SingletonInsertMethodProgrammatically implements SingletonInsertMet
 	
 	// METHODS (ABSTRACT METHOD IMPLEMENTATIONS)
 	@Override
-	public void privatizeConstructorsInAST(InsertionHelper insertionHelper)
+	public void privatizeConstructorsInAST(InsertionDataDefault insertionHelper)
 	{
 		// we're pushing source modifications of a more general nature (useful for many
 		// patterns) into a helper class
@@ -55,10 +55,10 @@ public class SingletonInsertMethodProgrammatically implements SingletonInsertMet
 	
 	
 	@Override
-	public boolean addSingletonFieldToAST(InsertionHelper insertionHelper, SingletonConfigData configData)
+	public boolean addSingletonFieldToAST(InsertionDataDefault insertionHelper, SingletonConfigData configData)
 	{
 		AST ast = insertionHelper.getAST();
-		TypeDeclaration topClassDeclaration = insertionHelper.getTopClassDeclaration();
+		TypeDeclaration topClassDeclaration = insertionHelper.getClassDeclaration();
 		SingletonImplType singletonImplType = (SingletonImplType) configData.getSelectedImplTypeInstance();
 		
 		// setup field modifiers and create field declaration
@@ -83,10 +83,10 @@ public class SingletonInsertMethodProgrammatically implements SingletonInsertMet
 	
 	
 	@Override
-	public boolean addHolderClassToAST(InsertionHelper insertionHelper, SingletonConfigData configData)
+	public boolean addHolderClassToAST(InsertionDataDefault insertionHelper, SingletonConfigData configData)
 	{
 		AST ast = insertionHelper.getAST();
-		TypeDeclaration topClassDeclaration = insertionHelper.getTopClassDeclaration();
+		TypeDeclaration topClassDeclaration = insertionHelper.getClassDeclaration();
 		
 		// Holder class declaration (plus addition into topclass in helper method)
 		List<IExtendedModifier> holderModifiers = ASTManipulationHelper.createModifierList(ast, ModifierKeyword.PRIVATE_KEYWORD,
@@ -111,10 +111,10 @@ public class SingletonInsertMethodProgrammatically implements SingletonInsertMet
 	
 	@SuppressWarnings("unchecked")
 	@Override
-	public boolean addCreateInstanceMethodToAST(InsertionHelper insertionHelper, SingletonConfigData configData)
+	public boolean addCreateInstanceMethodToAST(InsertionDataDefault insertionHelper, SingletonConfigData configData)
 	{
 		AST ast = insertionHelper.getAST();
-		TypeDeclaration topClassDeclaration = insertionHelper.getTopClassDeclaration();
+		TypeDeclaration topClassDeclaration = insertionHelper.getClassDeclaration();
 		SingletonImplType singletonImplType = (SingletonImplType) configData.getSelectedImplTypeInstance();
 		String holderName = configData.getHolderClassIdentifier();
 		String singletonInstanceName = configData.getSingletonInstanceIdentifier();
@@ -156,7 +156,7 @@ public class SingletonInsertMethodProgrammatically implements SingletonInsertMet
 	
 	// HELPER METHODS
 	@SuppressWarnings("unchecked")
-	private IfStatement createIfStatementInCreateInstanceMethod(AST ast, String singletonInstanceIdentifier, TypeDeclaration topClassDeclaration)
+	IfStatement createIfStatementInCreateInstanceMethod(AST ast, String singletonInstanceIdentifier, TypeDeclaration topClassDeclaration)
 	{
 		//IF clause
 		SimpleName singletonObjectName = ast.newSimpleName(singletonInstanceIdentifier);
@@ -174,7 +174,7 @@ public class SingletonInsertMethodProgrammatically implements SingletonInsertMet
 	
 	
 	@SuppressWarnings("unchecked")
-	private MethodDeclaration createMethodDeclCreateInstance(AST ast, String factoryMethodIdentifier , TypeDeclaration topClassDeclaration, SingletonImplType singletonImplType)
+	MethodDeclaration createMethodDeclCreateInstance(AST ast, String factoryMethodIdentifier , TypeDeclaration topClassDeclaration, SingletonImplType singletonImplType)
 	{
 		//method name
 		MethodDeclaration getInstantMeth = ast.newMethodDeclaration();

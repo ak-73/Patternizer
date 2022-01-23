@@ -1,5 +1,6 @@
 package de.patternizer.eclipse.patterns;
 
+
 import java.util.List;
 
 import org.eclipse.core.commands.ExecutionEvent;
@@ -15,7 +16,8 @@ import org.eclipse.text.edits.MalformedTreeException;
 import org.eclipse.text.edits.TextEdit;
 import org.eclipse.ui.IWorkbenchWindow;
 
-import de.patternizer.eclipse.patterns.helpers.InsertionHelper;
+import de.patternizer.eclipse.patterns.helpers.InsertionDataDefault;
+import de.patternizer.eclipse.patterns.helpers.SrcCodeModMethod;
 
 /**
  * Abstract base class that serves as focal launching point for each featured
@@ -29,18 +31,23 @@ public abstract class InsertPattern
 {
 	
 	// FIELDS
+	protected ExecutionEvent event = null;
 	protected IWorkbenchWindow window = null;
+	protected InsertionDataDefault insertionHelper = null;
 	protected String patternName = "UNDEFINED";
 	
 	
 	
 	
 	// CONSTRUCTORS
-	public InsertPattern(IWorkbenchWindow window)
+	public InsertPattern(ExecutionEvent event, IWorkbenchWindow window, String patternName)
 	{
+		this.event = event;
 		this.window = window;
+		this.patternName = patternName;
+		insertionHelper = new InsertionDataDefault(window);
+		insertionHelper.init(event);
 	}
-	
 	
 	
 	
@@ -134,9 +141,12 @@ public abstract class InsertPattern
 	/**
 	 * This method handles the actual pattern insertion, based on the configuration
 	 * selected by the user, by calling
-	 * {@link PatternImplType#execute(PatternConfigData, InsertionHelper)} on a
+	 * {@link PatternImplType#execute(PatternConfigData, InsertionDataDefault)} on a
 	 * subclass of {@code PatternImplType} The chosen pattern in the form selected
-	 * during insertion configuration.
+	 * during insertion configuration. This method will also ensure all
+	 * modifications will get recorded and written to file, unless a pattern
+	 * specific method has been set in
+	 * {@link PatternConfigData#setPatternSpecificModMethod(SrcCodeModMethod)}.
 	 * 
 	 * @param event      the Eclipse event that triggered this command execution
 	 * @param configData
@@ -145,17 +155,26 @@ public abstract class InsertPattern
 	 */
 	public void insertPattern(ExecutionEvent event, PatternConfigData configData)
 	{
-		InsertionHelper insertionHelper = new InsertionHelper(window);
-		insertionHelper.init(event);
-		
 		Class<? extends PatternImplType> implTypeClass = configData.getSelectedImplTypeClass();
 		PatternImplType patternImplType = createPatternImplType(implTypeClass);
 		configData.setSelectedImplTypeInstance(patternImplType);
 		
+		if (configData.getPatternSpecificModMethod() == null) recordAndExecute(configData, patternImplType);
+		else patternImplType.execute(configData, insertionHelper);
+	}
+	
+	/**
+	 * Internal method for taking over recording and updating file responsibilities.
+	 * @param configData
+	 * @param patternImplType
+	 */
+	private void recordAndExecute(PatternConfigData configData, PatternImplType patternImplType)
+	{
+		insertionHelper.recordModifications();
 		patternImplType.execute(configData, insertionHelper);
-		
 		writeChangesFromASTToSourceFile(insertionHelper);
 	}
+	
 	
 	
 	
@@ -179,7 +198,8 @@ public abstract class InsertPattern
 		wizard.setPatternName(patternName);
 		PatternConfigPagePlugin configPagePlugin = createPatternConfigPagePlugin();
 		configData.setPatternConfigPagePlugin(configPagePlugin);
-		wizard.setPatternConfigPageHandler(configPagePlugin);
+		wizard.setPatternConfigPagePlugin(configPagePlugin);
+		configData.setSelectedImplTypeIndex(configData.getSelectedImplTypeIndex()); // triggers plugin widget setup for the initial state
 		WizardDialog dialog = new WizardDialog(window.getShell(), wizard);
 		dialog.create();
 		dialog.setBlockOnOpen(true);
@@ -196,13 +216,11 @@ public abstract class InsertPattern
 	 * 
 	 * @param insertionHelper helper class
 	 */
-	public void writeChangesFromASTToSourceFile(InsertionHelper insertionHelper)
+	public void writeChangesFromASTToSourceFile(InsertionDataDefault insertionHelper)
 	{
 		ICompilationUnit unit = insertionHelper.getICU();
 		CompilationUnit cu = insertionHelper.getCU();
 		Document document = insertionHelper.getDocument();
-		
-		System.out.println(insertionHelper.getTopClassDeclaration());
 		
 		TextEdit edits = cu.rewrite(document, unit.getJavaProject().getOptions(true));
 		try
@@ -214,7 +232,7 @@ public abstract class InsertPattern
 		}
 		catch (MalformedTreeException | BadLocationException | JavaModelException e)
 		{
-			// TODO reminder to handle the exceptions; also autoformat the changed file
+			// FIXME reminder to handle the exceptions in this entire plugin properly
 		}
 	}
 	

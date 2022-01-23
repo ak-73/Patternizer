@@ -2,10 +2,15 @@ package de.patternizer.eclipse.patterns.helpers;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
+import org.eclipse.core.commands.Command;
+import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.commands.ICommandService;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -34,8 +39,13 @@ class PatternImplManagerTest
 	@Test
 	public void test_GetPatternInsertingInstance_Singleton_NotNull()
 	{
+		Map<String, String> parameters = new HashMap<String, String>();
+		ICommandService commandService = (ICommandService) PlatformUI.getWorkbench().getService(ICommandService.class);
+		Command c = commandService.getCommand("de.patternizer.patterns.Singleton");
+		ExecutionEvent event = new ExecutionEvent(c, parameters, null, null);
+		
 		IWorkbenchWindow window = PlatformUI.getWorkbench().getActiveWorkbenchWindow();
-		InsertPattern patternInserter = PatternImplManager.getPatternInsertingInstance("Singleton", window);
+		InsertPattern patternInserter = PatternImplManager.getPatternInsertingInstance(event, window, "Singleton");		
 		assertNotNull(patternInserter);
 	}
 	

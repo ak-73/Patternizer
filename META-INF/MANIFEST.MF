@@ -2,6 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Patternizer
 Bundle-SymbolicName: Patternizer;singleton:=true
+Automatic-Module-Name: Patternizer
 Bundle-Version: 1.0.0.20211202
 Bundle-Vendor: PatternizerVendor
 Require-Bundle: org.eclipse.core.databinding,

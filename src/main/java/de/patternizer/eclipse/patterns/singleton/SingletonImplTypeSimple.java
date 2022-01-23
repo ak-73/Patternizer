@@ -1,7 +1,7 @@
 package de.patternizer.eclipse.patterns.singleton;
 
 import de.patternizer.eclipse.patterns.PatternConfigData;
-import de.patternizer.eclipse.patterns.helpers.InsertionHelper;
+import de.patternizer.eclipse.patterns.helpers.InsertionDataDefault;
 
 /**
  * This class uses an instance of a {@link SingletonInsertMethod} subclass to
@@ -36,7 +36,7 @@ public class SingletonImplTypeSimple extends SingletonImplType
 	 * in the appropriate order.
 	 */
 	@Override
-	public void execute(PatternConfigData configData, InsertionHelper insertionHelper)
+	public void execute(PatternConfigData configData, InsertionDataDefault insertionHelper)
 	{
 		if (!(configData instanceof SingletonConfigData)) return;
 		

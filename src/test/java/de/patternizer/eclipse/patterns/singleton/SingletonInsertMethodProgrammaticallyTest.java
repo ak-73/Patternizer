@@ -24,7 +24,7 @@ import org.junit.jupiter.api.Test;
 
 import de.patternizer.eclipse.patterns.PatternImplType;
 import de.patternizer.eclipse.patterns.helpers.FieldVisitor;
-import de.patternizer.eclipse.patterns.helpers.InsertionHelper;
+import de.patternizer.eclipse.patterns.helpers.InsertionDataDefault;
 import de.patternizer.eclipse.patterns.helpers.MethodVisitor;
 import de.patternizer.eclipse.patterns.helpers.PatternImplManager;
 
@@ -35,7 +35,7 @@ class SingletonInsertMethodProgrammaticallyTest
 	public ICompilationUnit icu = null;
 	public TypeDeclaration topClassDeclaration = null;
 	
-	InsertionHelper insertionHelperFake = null;	
+	InsertionDataDefault insertionHelperFake = null;	
 	SingletonConfigData configData = null;
 	
 	SingletonInsertMethodProgrammatically sut = null;
@@ -70,7 +70,7 @@ class SingletonInsertMethodProgrammaticallyTest
 		ast = cu.getAST();
 		topClassDeclaration = getTopClassDeclaration("SampleClass", cu, ast);	
 		
-		insertionHelperFake = new InsertionHelper(null);
+		insertionHelperFake = new InsertionDataDefault(null);
 		insertionHelperFake.setAst(ast);
 		insertionHelperFake.setCu(cu);
 		insertionHelperFake.setTopClassDeclaration(topClassDeclaration);
@@ -166,7 +166,6 @@ class SingletonInsertMethodProgrammaticallyTest
 		for (AbstractTypeDeclaration typeDeclaration : typedeclarations)
 		{
 			SimpleName typeName = typeDeclaration.getName();
-			// TODO check if the underlying assumption for this comparison holds true
 			if (typeName.toString().equals(className))
 			{
 				topClassDeclaration = typeDeclaration;

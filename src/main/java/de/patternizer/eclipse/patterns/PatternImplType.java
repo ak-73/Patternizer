@@ -1,6 +1,6 @@
 package de.patternizer.eclipse.patterns;
 
-import de.patternizer.eclipse.patterns.helpers.InsertionHelper;
+import de.patternizer.eclipse.patterns.helpers.InsertionDataDefault;
 
 /**
  * Abstract base class for all pattern implementation inserters.
@@ -44,7 +44,7 @@ public abstract class PatternImplType
 	public static final String DESCRIPTION = "ERROR!";
 	
 	// FIELDS
-	protected PatternConfigPagePlugin patternConfigPageHandler = null;
+	protected PatternConfigPagePlugin patternConfigPagePlugin = null;
 	
 	
 	
@@ -57,7 +57,7 @@ public abstract class PatternImplType
 	 * @param configData an instance of an appropriate subclass of {@link PatternConfigData}
 	 * @param insertionHelper helper class
 	 */
-	public abstract void execute(PatternConfigData configData, InsertionHelper insertionHelper);
+	public abstract void execute(PatternConfigData configData, InsertionDataDefault insertionHelper);
 	
 	
 	
@@ -93,18 +93,18 @@ public abstract class PatternImplType
 	 * Plain getter.
 	 * @return
 	 */
-	public PatternConfigPagePlugin getPatternConfigPageHandler()
+	public PatternConfigPagePlugin getPatternConfigPagePlugin()
 	{
-		return patternConfigPageHandler;
+		return patternConfigPagePlugin;
 	}
 	
 	/**
 	 * Plain setter.
-	 * @param patternConfigPageHandler
+	 * @param patternConfigPagePlugin
 	 */
-	public void setPatternConfigPageHandler(PatternConfigPagePlugin patternConfigPageHandler)
+	public void setPatternConfigPagePlugin(PatternConfigPagePlugin patternConfigPagePlugin)
 	{
-		this.patternConfigPageHandler = patternConfigPageHandler;
+		this.patternConfigPagePlugin = patternConfigPagePlugin;
 	}
 	
 	

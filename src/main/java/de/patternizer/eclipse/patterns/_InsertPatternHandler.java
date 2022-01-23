@@ -51,7 +51,8 @@ public class _InsertPatternHandler extends AbstractHandler
 		// preparations
 		String patternName = getPatternName(event);
 		List<Class<? extends PatternImplType>> patternImplementations = getPatternImplementations(patternName);
-		InsertPattern patternInserter = getPatternInserter(patternName);
+		System.out.println(patternImplementations);
+		InsertPattern patternInserter = getPatternInserter(event, patternName);
 		
 		// open config dialog
 		PatternConfigData configData = patternInserter.configurePatternInsertion(event, patternImplementations);
@@ -76,9 +77,9 @@ public class _InsertPatternHandler extends AbstractHandler
 	 * @see de.patternizer.eclipse.patterns.singleton.InsertSingleton
 	 *      InsertSingleton as an example subclass
 	 */
-	private InsertPattern getPatternInserter(String patternName)
+	private InsertPattern getPatternInserter(ExecutionEvent event, String patternName)
 	{
-		InsertPattern patternInserter = PatternImplManager.getPatternInsertingInstance(patternName, window);
+		InsertPattern patternInserter = PatternImplManager.getPatternInsertingInstance(event, window, patternName);
 		if (patternInserter == null) throw new IllegalArgumentException("No pattern inserting class found!");
 		return patternInserter;
 	}

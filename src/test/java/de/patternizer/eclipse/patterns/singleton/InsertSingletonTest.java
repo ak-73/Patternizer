@@ -1,7 +1,13 @@
 package de.patternizer.eclipse.patterns.singleton;
 
+import java.util.HashMap;
+import java.util.Map;
+
+import org.eclipse.core.commands.Command;
+import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.commands.ICommandService;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -18,8 +24,13 @@ class InsertSingletonTest
 	@BeforeEach
 	public void arrange()
 	{
+		Map<String, String> parameters = new HashMap<String, String>();
+		ICommandService commandService = (ICommandService) PlatformUI.getWorkbench().getService(ICommandService.class);
+		Command c = commandService.getCommand("de.patternizer.patterns.Singleton");
+		ExecutionEvent event = new ExecutionEvent(c, parameters, null, null);
+		
 		window = PlatformUI.getWorkbench().getActiveWorkbenchWindow();
-		sut = new InsertSingleton(window, "Singleton");
+		sut = new InsertSingleton(event, window, "Singleton");
 	}
 	
 	

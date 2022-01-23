@@ -6,6 +6,7 @@ import de.patternizer.eclipse.patterns.PatternConfigData;
  * Singleton-specific config data that adds fields for
  * <ul>
  * <li>naming the singleton object; and,</li>
+ * <li>naming the singleton factory method; and,</li>
  * <li>optionally naming any holder class object.</li>
  * </ul>
  * 

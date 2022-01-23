@@ -9,8 +9,11 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
 
+import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.reflections.Reflections;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import de.patternizer.eclipse.patterns.InsertPattern;
 import de.patternizer.eclipse.patterns.PatternImplType;
@@ -31,6 +34,8 @@ import de.patternizer.eclipse.patterns.singleton.SingletonImplTypeLazy;
  */
 public class PatternImplManager implements Comparator<Class<? extends PatternImplType>>
 {
+	private static Logger logger = LoggerFactory.getLogger(PatternImplManager.class);
+	
 	public static final String BASEPACKAGE = "de.patternizer.eclipse.patterns";
 	public static Map<String, List<Class<? extends PatternImplType>>> pattermImpListsByPatternName = new TreeMap<String, List<Class<? extends PatternImplType>>>();
 	
@@ -53,6 +58,14 @@ public class PatternImplManager implements Comparator<Class<? extends PatternImp
 		
 		Reflections reflections = new Reflections(BASEPACKAGE + "." + patternName.toLowerCase());
 		var implSet = reflections.getSubTypesOf(PatternImplType.class);
+		
+		//FIXME look into this
+		//for SOME reason it fails sometimes to find the impls; let's try it a second time before giving up
+		if ((implSet == null) || (implSet.isEmpty()))
+		{
+			logger.warn("Reflections instance " + reflections.toString() + " did not find the subtypes in package " + BASEPACKAGE + "." + patternName.toLowerCase() + ". Trying a second time before giving up...");
+			implSet = reflections.getSubTypesOf(PatternImplType.class);
+		}
 		
 		if (implSet == null) throw new IllegalStateException(
 				"Reflections.getSubTypesOf() returned null instead of a list of pattern implementations for pattern " + patternName + ".");
@@ -82,24 +95,25 @@ public class PatternImplManager implements Comparator<Class<? extends PatternImp
 	 * @param window
 	 * @return
 	 */
-	public static InsertPattern getPatternInsertingInstance(String patternName, IWorkbenchWindow window)
+	public static InsertPattern getPatternInsertingInstance(ExecutionEvent event, IWorkbenchWindow window, String patternName)
 	{
 		String InsertPatternClassFullyQualifiedName = BASEPACKAGE + "." + patternName.toLowerCase() + ".Insert" + patternName;
 		
 		InsertPattern insertPattern = null;
 		Class<?> cl = null;
-		Class<?>[] type = { IWorkbenchWindow.class, String.class };
+		Class<?>[] type = { ExecutionEvent.class, IWorkbenchWindow.class, String.class };
 		Constructor<?> cons = null;
 		try
 		{
 			cl = Class.forName(InsertPatternClassFullyQualifiedName);
 			cons = cl.getConstructor(type);
-			insertPattern = (InsertPattern) cons.newInstance(window, patternName);
+			insertPattern = (InsertPattern) cons.newInstance(event, window, patternName);
 		}
 		catch (NoSuchMethodException | SecurityException | ClassNotFoundException | InstantiationException | IllegalAccessException | IllegalArgumentException
 				| InvocationTargetException e)
 		{
 			// TODO Auto-generated catch block
+			logger.error("Constructor invocation failed: " + e.toString() + e.getMessage());
 			e.printStackTrace();
 		}
 		

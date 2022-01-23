@@ -36,7 +36,6 @@ public class SingletonConfigPagePlugin extends PatternConfigPagePlugin
 	// CONSTRUCTORS
 	public SingletonConfigPagePlugin()
 	{
-		super();
 	}
 	
 	
